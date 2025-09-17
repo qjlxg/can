@@ -13,7 +13,7 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 50  # 整体超时 50 分钟
+    timeout-minutes: 5  # 整体超时 5 分钟
 
     steps:
       - name: Checkout repository
@@ -102,11 +102,11 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add --all
+          git add --all -- ':!market_monitor.log' ':!*.html'  # 排除日志和 HTML 文件
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update market monitor report and log - $(date)"
+            git commit -m "Update market monitor report - $(date)"
             git push
           fi
         env:
