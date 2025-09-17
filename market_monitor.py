@@ -234,7 +234,8 @@ class MarketMonitor:
                 
                 for handler in logger.handlers:
                     handler.flush()
-                time.sleep(random.uniform(1, 2))
+                # 在处理完一个基金后，随机延迟1到3秒
+                time.sleep(random.uniform(3, 8))
             except Exception as e:
                 logger.error("处理基金 %s 时发生异常: %s", fund_code, str(e))
                 self.fund_data[fund_code] = None
