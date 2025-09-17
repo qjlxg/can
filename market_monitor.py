@@ -114,6 +114,10 @@ class MarketMonitor:
                     wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
                     logger.info("第 %d 页: 历史净值表格容器加载完成并可见", page_count)
 
+                    # 等待分页导航加载
+                    wait.until(EC.presence_of_element_located((By.ID, 'pagebar')))
+                    logger.info("第 %d 页: 分页导航容器加载完成", page_count)
+
                     # 解析当前页面表格
                     table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
                     df_list = pd.read_html(StringIO(table_html), flavor='lxml')
@@ -131,26 +135,33 @@ class MarketMonitor:
                     all_data.append(df)
                     logger.info("第 %d 页: 解析成功，获取 %d 行数据", page_count, len(df))
 
-                    # 检查是否有下一页按钮，并等待其可点击
-                    next_button_xpath = "//div[@id='pagebar']//a[text()='下一页']"
-                    wait.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
-                    next_button = driver.find_element(By.XPATH, next_button_xpath)
-                    
-                    # 检查按钮是否为禁用状态
-                    if 'nolink' in next_button.get_attribute('class'):
-                        logger.info("基金 %s 已到达最后一页，翻页结束", fund_code)
+                    # 检查是否有下一页按钮
+                    try:
+                        # 使用更宽松的XPath，匹配包含“下一页”文本的元素
+                        next_button_xpath = "//div[@id='pagebar']//a[contains(text(), '下一页')]"
+                        wait.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
+                        next_button = driver.find_element(By.XPATH, next_button_xpath)
+                        
+                        # 检查按钮是否可点击（通过检查class是否包含禁用标志）
+                        button_class = next_button.get_attribute('class') or ''
+                        if 'nolink' in button_class or 'disabled' in button_class:
+                            logger.info("基金 %s 已到达最后一页，翻页结束", fund_code)
+                            break
+                        
+                        # 使用JavaScript点击，增加可靠性
+                        driver.execute_script("arguments[0].click();", next_button)
+                        page_count += 1
+                        time.sleep(random.uniform(2, 3))  # 增加延迟以等待页面加载
+
+                    except (NoSuchElementException, StaleElementReferenceException):
+                        logger.info("基金 %s 无下一页按钮，或按钮已失效，翻页结束", fund_code)
                         break
-                    
-                    # 使用JavaScript点击，更可靠
-                    driver.execute_script("arguments[0].click();", next_button)
-                    page_count += 1
-                    time.sleep(random.uniform(1.5, 2.5))  # 增加延迟以等待页面加载
+                    except TimeoutException:
+                        logger.info("基金 %s 等待下一页按钮超时，可能已到达最后一页", fund_code)
+                        break
 
                 except TimeoutException:
-                    logger.info("基金 %s 翻页超时，可能已到达最后一页", fund_code)
-                    break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    logger.info("基金 %s 无下一页按钮，或按钮已失效，翻页结束", fund_code)
+                    logger.info("基金 %s 页面加载超时，可能已到达最后一页", fund_code)
                     break
                 except Exception as e:
                     logger.error("翻页失败: %s", str(e))
