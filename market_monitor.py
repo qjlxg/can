@@ -39,12 +39,16 @@ class MarketMonitor:
         try:
             with open(self.report_file, 'r', encoding='utf-8') as f:
                 content = f.read()
+            logger.info("analysis_report.md 内容（前1000字符）: %s", content[:1000])
             
-            # 提取推荐基金表格
-            pattern = r'\| *(\d{6}) *\|.*?\| *(\d+\\.?\\d*) *\|'
-            matches = re.findall(pattern, content)
-            self.fund_codes = [code for code, _ in matches]
-            logger.info("提取到 %d 个推荐基金: %s", len(self.fund_codes), self.fund_codes)
+            # 优化正则表达式，仅匹配6位基金代码，忽略其他列
+            pattern = r'\| *(\d{6}) *\|.*?\|'
+            matches = re.findall(pattern, content, re.MULTILINE)
+            self.fund_codes = list(set(matches))  # 去重
+            if not self.fund_codes:
+                logger.warning("未提取到任何基金代码，请检查 analysis_report.md 是否包含基金代码表格")
+            else:
+                logger.info("提取到 %d 个推荐基金: %s", len(self.fund_codes), self.fund_codes)
             
         except Exception as e:
             logger.error("解析报告文件失败: %s", e)
@@ -55,7 +59,6 @@ class MarketMonitor:
         logger.info("正在获取基金 %s 的净值数据...", fund_code)
         
         try:
-            # 配置 Chrome 选项，支持无头模式
             options = webdriver.ChromeOptions()
             options.add_argument('--headless')
             options.add_argument('--no-sandbox')
@@ -64,40 +67,33 @@ class MarketMonitor:
             options.add_argument('--window-size=1920,1080')
             options.add_argument('user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36')
             
-            # 使用 webdriver-manager 自动管理 ChromeDriver
             service = Service(ChromeDriverManager().install())
             self.driver = webdriver.Chrome(service=service, options=options)
             
-            # 使用 HTTPS 协议
             url = f"https://www.dayfund.cn/fundvalue/{fund_code}.html"
             self.driver.get(url)
             logger.info("访问URL: %s", url)
 
-            # 显式等待，确保净值表格加载完成
-            wait = WebDriverWait(self.driver, 30)  # 增加超时到30秒
+            wait = WebDriverWait(self.driver, 30)
             table_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'table')))
             logger.info("表格元素加载完成")
             
-            # 使用 pandas 读取表格
             df_list = pd.read_html(self.driver.page_source, flavor='html5lib')
             if not df_list:
                 raise ValueError("未找到任何表格")
             
-            # 查找包含净值数据的表格
             df = None
             for temp_df in df_list:
-                if len(temp_df.columns) >= 9 and ('净值日期' in temp_df.columns or '日期' in str(temp_df.columns[0])):
+                if len(temp_df.columns) >= 9 and ('净值日期' in str(temp_df.columns) or '日期' in str(temp_df.columns[0])):
                     df = temp_df
                     break
             
             if df is None:
                 raise ValueError("未找到有效的净值表格")
             
-            # 重命名列以匹配文档结构
             df.columns = ['date', 'fund_code', 'fund_name', 'net_value', 'accumulated_net_value', 
                           'prev_net_value', 'prev_accumulated_net_value', 'daily_growth_value', 'daily_growth_rate']
             
-            # 数据清洗
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
             df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
             df = df.dropna(subset=['date', 'net_value'])
@@ -114,7 +110,7 @@ class MarketMonitor:
             logger.error("Selenium 抓取基金 %s 失败: %s", fund_code, str(e))
             if self.driver:
                 with open(f"error_page_{fund_code}.html", "w", encoding="utf-8") as f:
-                    f.write(self.driver.page_source[:2000])  # 保存前2000字符
+                    f.write(self.driver.page_source[:2000])
                 logger.info("错误页面已保存到 error_page_%s.html", fund_code)
             return None
         finally:
@@ -131,7 +127,6 @@ class MarketMonitor:
             
             if df is not None and not df.empty and len(df) >= 50:
                 df = df.sort_values(by='date', ascending=True)
-                # 计算 RSI (14日)
                 delta = df['net_value'].diff()
                 gain = delta.where(delta > 0, 0)
                 loss = -delta.where(delta < 0, 0)
@@ -140,10 +135,8 @@ class MarketMonitor:
                 rs = avg_gain / avg_loss
                 rsi = 100 - (100 / (1 + rs))
                 
-                # 计算 MA50
                 ma50 = df['net_value'].rolling(window=50).mean()
                 
-                # 获取最新数据
                 latest_data = df.iloc[-1]
                 latest_net_value = latest_data['net_value']
                 latest_rsi = rsi.iloc[-1] if not pd.isna(rsi.iloc[-1]) else float('nan')
@@ -161,7 +154,6 @@ class MarketMonitor:
                 self.fund_data[fund_code] = None
                 logger.warning("基金 %s 数据获取失败或数据不足，跳过计算 (数据行数: %s)", fund_code, len(df) if df is not None else 0)
             
-            # 随机延迟，避免被网站限流
             time.sleep(random.uniform(1, 3))
 
     def generate_report(self):
@@ -174,21 +166,28 @@ class MarketMonitor:
             f.write("| 基金代码 | 最新净值 | RSI | 净值/MA50 | 投资建议 |\n")
             f.write("|----------|----------|-----|-----------|----------|\n")
             
-            for fund_code in self.fund_codes:
-                if fund_code in self.fund_data and self.fund_data[fund_code]:
-                    data = self.fund_data[fund_code]
-                    rsi = data['rsi']
-                    ma_ratio = data['ma_ratio']
-                    advice = (
-                        "等待回调" if not pd.isna(rsi) and rsi > 70 or not pd.isna(ma_ratio) and ma_ratio > 1.2 else
-                        "可分批买入" if (pd.isna(rsi) or 30 <= rsi <= 70) and (pd.isna(ma_ratio) or 0.8 <= ma_ratio <= 1.2) else
-                        "可加仓" if not pd.isna(rsi) and rsi < 30 else "观察"
-                    )
-                    f.write(f"| {fund_code} | {data['latest_net_value']:.4f} | {rsi:.2f if not pd.isna(rsi) else 'N/A'} | {ma_ratio:.2f if not pd.isna(ma_ratio) else 'N/A'} | {advice} |\n")
-                else:
-                    f.write(f"| {fund_code} | 数据获取失败 | - | - | 观察 |\n")
+            if not self.fund_codes:
+                f.write("| 无 | 无数据 | - | - | 请检查 analysis_report.md 是否包含有效基金代码 |\n")
+                logger.warning("没有基金代码可处理，生成空报告")
+            else:
+                for fund_code in self.fund_codes:
+                    if fund_code in self.fund_data and self.fund_data[fund_code]:
+                        data = self.fund_data[fund_code]
+                        rsi = data['rsi']
+                        ma_ratio = data['ma_ratio']
+                        advice = (
+                            "等待回调" if not pd.isna(rsi) and rsi > 70 or not pd.isna(ma_ratio) and ma_ratio > 1.2 else
+                            "可分批买入" if (pd.isna(rsi) or 30 <= rsi <= 70) and (pd.isna(ma_ratio) or 0.8 <= ma_ratio <= 1.2) else
+                            "可加仓" if not pd.isna(rsi) and rsi < 30 else "观察"
+                        )
+                        f.write(f"| {fund_code} | {data['latest_net_value']:.4f} | {rsi:.2f if not pd.isna(rsi) else 'N/A'} | {ma_ratio:.2f if not pd.isna(ma_ratio) else 'N/A'} | {advice} |\n")
+                    else:
+                        f.write(f"| {fund_code} | 数据获取失败 | - | - | 观察 |\n")
         
         logger.info("报告生成完成: %s", self.output_file)
+        # 输出报告内容到日志以便调试
+        with open(self.output_file, 'r', encoding='utf-8') as f:
+            logger.info("market_monitor_report.md 内容: %s", f.read())
 
 if __name__ == "__main__":
     try:
