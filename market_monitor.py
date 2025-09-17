@@ -6,17 +6,11 @@ import logging
 from datetime import datetime
 import time
 import random
-from io import StringIO
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import TimeoutException, WebDriverException
-import tenacity
+import requests
+import json
+import hashlib
 
-# 配置日志：使用 FileHandler 确保实时写入
+# 配置日志
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -33,7 +27,6 @@ class MarketMonitor:
         self.output_file = output_file
         self.fund_codes = []
         self.fund_data = {}
-        self.driver = None
 
     def _parse_report(self):
         """从 analysis_report.md 提取推荐基金代码"""
@@ -63,92 +56,54 @@ class MarketMonitor:
             logger.error("解析报告文件失败: %s", e)
             raise
 
-    @tenacity.retry(
-        stop=tenacity.stop_after_attempt(3),
-        wait=tenacity.wait_fixed(2),
-        retry=tenacity.retry_if_exception_type((TimeoutException, WebDriverException)),
-        before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[1]}，第 {retry_state.attempt_number} 次")
-    )
-    def _get_fund_data_from_dayfund(self, fund_code):
-        """使用 Selenium 从 dayfund.cn 抓取基金历史净值数据"""
+    def _get_fund_data_from_eastmoney(self, fund_code):
+        """从东方财富网 API 抓取基金历史净值数据"""
         logger.info("正在获取基金 %s 的净值数据...", fund_code)
         
-        driver = None
         try:
-            options = webdriver.ChromeOptions()
-            options.add_argument('--headless')
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-            options.add_argument('--disable-gpu')
-            options.add_argument('--window-size=1920,1080')
-            options.add_argument('--disable-extensions')
-            options.add_argument('--disable-infobars')
-            options.add_argument('user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36')
+            # 生成随机 rt 参数避免缓存
+            rt = round(random.uniform(0.1, 0.9), 6)
+            url = f"https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code={fund_code}&page=1&per=5000&sdate=&edate=&rt={rt}"
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
             
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=options)
+            # 解析 JSON
+            data = json.loads(response.text)
+            if 'DataLSJZ' not in data or not data['DataLSJZ']:
+                raise ValueError("API 返回空数据")
             
-            url = f"https://www.dayfund.cn/fundvalue/{fund_code}.html"
-            driver.set_page_load_timeout(30)  # 页面加载超时30秒
-            driver.get(url)
-            logger.info("访问URL: %s", url)
-
-            # 检查页面加载状态
-            WebDriverWait(driver, 10).until(
-                lambda d: d.execute_script('return document.readyState') == 'complete'
-            )
-            wait = WebDriverWait(driver, 10)  # 缩短超时到10秒
-            table_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'table')))
-            logger.info("表格元素加载完成")
+            # 解析净值数据
+            rows = data['DataLSJZ'].split(';')
+            net_values = []
+            dates = []
+            for row in rows:
+                if row.strip():
+                    parts = row.strip().split(',')
+                    if len(parts) >= 2:
+                        date = parts[0].replace('Date:', '').strip("'")
+                        net_value = float(parts[1].replace('NetValue:', '').strip())
+                        dates.append(date)
+                        net_values.append(net_value)
             
-            # 优先尝试 lxml 解析器，失败则用 html5lib
-            try:
-                df_list = pd.read_html(StringIO(driver.page_source), flavor='lxml')
-            except ValueError:
-                logger.info("lxml 解析失败，尝试 html5lib")
-                df_list = pd.read_html(StringIO(driver.page_source), flavor='html5lib')
-            
-            if not df_list:
-                raise ValueError("未找到任何表格")
-            
-            df = None
-            for temp_df in df_list:
-                if len(temp_df.columns) >= 4 and ('净值日期' in str(temp_df.columns) or '日期' in str(temp_df.iloc[0, 0]) if not temp_df.empty else False):
-                    df = temp_df
-                    break
-            
-            if df is None:
-                raise ValueError("未找到有效的净值表格")
-            
-            df = df.iloc[:, [0, 3]]  # 提取日期和净值列
-            df.columns = ['date', 'net_value']
-            
+            df = pd.DataFrame({'date': dates, 'net_value': net_values})
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
-            df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
-            df = df.dropna(subset=['date', 'net_value'])
-            df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
+            df = df.dropna(subset=['date', 'net_value']).sort_values(by='date', ascending=True)
             
             if df.empty:
                 raise ValueError("清洗后数据为空")
             
-            df = df.tail(100)  # 限制最近100天数据
+            # 限制最近100天数据
+            df = df.tail(100)
             logger.info("成功解析基金 %s 的数据，行数: %d, 最新日期: %s, 最新净值: %.4f", 
                         fund_code, len(df), df['date'].iloc[-1], df['net_value'].iloc[-1])
             return df[['date', 'net_value']]
 
         except Exception as e:
-            logger.error("Selenium 抓取基金 %s 失败: %s", fund_code, str(e))
-            if driver:
-                try:
-                    with open(f"error_page_{fund_code}.html", "w", encoding="utf-8") as f:
-                        f.write(driver.page_source[:2000])
-                    logger.info("错误页面已保存到 error_page_%s.html", fund_code)
-                except:
-                    pass
-            raise  # 抛出异常以触发重试
-        finally:
-            if driver:
-                driver.quit()
+            logger.error("API 抓取基金 %s 失败: %s", fund_code, str(e))
+            return None
 
     def get_fund_data(self):
         """获取所有基金的数据"""
@@ -156,7 +111,7 @@ class MarketMonitor:
         for i, fund_code in enumerate(self.fund_codes, 1):
             try:
                 logger.info("处理第 %d/%d 个基金: %s", i, len(self.fund_codes), fund_code)
-                df = self._get_fund_data_from_dayfund(fund_code)
+                df = self._get_fund_data_from_eastmoney(fund_code)
                 
                 if df is not None and not df.empty and len(df) >= 14:
                     df = df.sort_values(by='date', ascending=True)
@@ -189,7 +144,7 @@ class MarketMonitor:
                 
                 for handler in logger.handlers:
                     handler.flush()
-                time.sleep(random.uniform(1, 2))
+                time.sleep(random.uniform(0.5, 1.5))  # 减少延迟
             except Exception as e:
                 logger.error("处理基金 %s 时发生异常: %s", fund_code, str(e))
                 self.fund_data[fund_code] = None
