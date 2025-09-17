@@ -47,12 +47,22 @@ class MarketMonitor:
                 content = f.read()
             logger.info("analysis_report.md 内容（前1000字符）: %s", content[:1000])
             
-            # 使用更宽泛的模式来匹配所有可能的基金代码
-            pattern = r'(\d{6})'
-            matches = re.findall(pattern, content)
-            self.fund_codes = list(set(matches))  # 去重
+            # 使用更精确的正则表达式来匹配基金代码
+            # 1. 匹配表格中的基金代码，例如：| 007509 |
+            # 2. 匹配详细分析中的基金代码，例如：### 基金 001407 -
+            pattern = re.compile(r'(?:^\| +(\d{6})|### 基金 (\d{6}))', re.M)
+            matches = pattern.findall(content)
+
+            extracted_codes = set()
+            for match in matches:
+                # findall 返回的是一个元组，我们需要提取非空的那个
+                code = match[0] if match[0] else match[1]
+                extracted_codes.add(code)
             
-            self.fund_codes = self.fund_codes[:10]  # 限制前10个有效代码
+            # 将集合转换为列表并进行排序
+            sorted_codes = sorted(list(extracted_codes))
+            self.fund_codes = sorted_codes[:10]  # 限制前10个有效代码
+            
             if not self.fund_codes:
                 logger.warning("未提取到任何有效基金代码，请检查 analysis_report.md")
             else:
