@@ -104,64 +104,53 @@ class MarketMonitor:
             driver.get(url)
             logger.info("访问URL: %s", url)
 
-            # 等待表格容器加载，并确保内容可见
-            wait = WebDriverWait(driver, 15)
-            wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
-            logger.info("历史净值表格容器加载完成并可见")
-
             all_data = []
+            page_count = 1
             
             while True:
-                # 解析当前页面表格
                 try:
-                    table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
-                    # 检查是否有数据加载，避免解析空表格
-                    if '数据加载中' in table_html or not table_html.strip():
-                        logger.warning("基金 %s 页面表格内容为空或仍在加载，等待...", fund_code)
-                        time.sleep(2) # 再次等待
-                        table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
+                    # 等待表格容器加载，并确保内容可见
+                    wait = WebDriverWait(driver, 15)
+                    wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
+                    logger.info("第 %d 页: 历史净值表格容器加载完成并可见", page_count)
 
+                    # 解析当前页面表格
+                    table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
                     df_list = pd.read_html(StringIO(table_html), flavor='lxml')
-                    if not df_list:
-                        raise ValueError("未找到任何表格")
                     
+                    if not df_list or df_list[0].empty:
+                        logger.warning("第 %d 页: 表格内容为空，可能已无更多数据", page_count)
+                        break
+
                     df = df_list[0]
-                    df = df.iloc[:, [0, 1]]  # 只取日期和单位净值
+                    df = df.iloc[:, [0, 1]].copy()  # 只取日期和单位净值
                     df.columns = ['date', 'net_value']
                     df['date'] = pd.to_datetime(df['date'], errors='coerce')
                     df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
                     df = df.dropna(subset=['date', 'net_value'])
                     all_data.append(df)
-                    logger.info("解析基金 %s 当前页面，获取 %d 行数据", fund_code, len(df))
-                
-                except Exception as e:
-                    logger.error("解析基金 %s 当前页面失败: %s", fund_code, str(e))
-                    # 尝试保存页面源码和截图以供调试
-                    try:
-                        driver.save_screenshot(f"parse_error_{fund_code}.png")
-                        with open(f"parse_error_{fund_code}.html", "w", encoding="utf-8") as f:
-                            f.write(driver.page_source)
-                        logger.info("解析失败截图和页面已保存。")
-                    except:
-                        logger.warning("无法保存调试文件。")
-                    break
+                    logger.info("第 %d 页: 解析成功，获取 %d 行数据", page_count, len(df))
 
-                # 检查是否有下一页
-                try:
-                    # 使用更稳定的 XPath 查找“下一页”按钮，并判断其是否可用
-                    next_button = driver.find_element(By.XPATH, "//div[@id='pageBar']//a[text()='下一页']")
+                    # 检查是否有下一页按钮，并等待其可点击
+                    next_button_xpath = "//div[@id='pagebar']//a[text()='下一页']"
+                    wait.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
+                    next_button = driver.find_element(By.XPATH, next_button_xpath)
+                    
+                    # 检查按钮是否为禁用状态
                     if 'nolink' in next_button.get_attribute('class'):
-                        logger.info("基金 %s 已到达最后一页", fund_code)
+                        logger.info("基金 %s 已到达最后一页，翻页结束", fund_code)
                         break
                     
                     # 使用JavaScript点击，更可靠
                     driver.execute_script("arguments[0].click();", next_button)
-                    time.sleep(random.uniform(1.5, 2.5))  # 等待页面加载
-                    wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
-                    logger.info("翻页成功")
-                
+                    page_count += 1
+                    time.sleep(random.uniform(1.5, 2.5))  # 增加延迟以等待页面加载
+
+                except TimeoutException:
+                    logger.info("基金 %s 翻页超时，可能已到达最后一页", fund_code)
+                    break
                 except (NoSuchElementException, StaleElementReferenceException):
-                    logger.info("基金 %s 无下一页按钮，或按钮已失效，结束翻页", fund_code)
+                    logger.info("基金 %s 无下一页按钮，或按钮已失效，翻页结束", fund_code)
                     break
                 except Exception as e:
                     logger.error("翻页失败: %s", str(e))
@@ -171,8 +160,8 @@ class MarketMonitor:
                 df = pd.concat(all_data, ignore_index=True)
                 df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
                 df = df.tail(100)  # 取最近 100 天
-                logger.info("成功解析基金 %s 的数据，行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                            fund_code, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
+                logger.info("成功解析基金 %s 的数据，共获取 %d 页，总行数: %d, 最新日期: %s, 最新净值: %.4f", 
+                            fund_code, page_count, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
                 return df[['date', 'net_value']]
             else:
                 raise ValueError("未获取到任何有效数据")
@@ -181,7 +170,6 @@ class MarketMonitor:
             logger.error("Selenium 抓取基金 %s 失败: %s", fund_code, str(e))
             if driver:
                 try:
-                    # 尝试保存截图和页面源码，以便调试
                     driver.save_screenshot(f"error_screenshot_{fund_code}.png")
                     with open(f"error_page_{fund_code}.html", "w", encoding="utf-8") as f:
                         f.write(driver.page_source)
@@ -235,7 +223,7 @@ class MarketMonitor:
                 for handler in logger.handlers:
                     handler.flush()
                 # 在处理完一个基金后，随机延迟1到3秒
-                time.sleep(random.uniform(3, 8))
+                time.sleep(random.uniform(1, 3))
             except Exception as e:
                 logger.error("处理基金 %s 时发生异常: %s", fund_code, str(e))
                 self.fund_data[fund_code] = None
