@@ -148,8 +148,11 @@ class MarketMonitor:
 
                 # 检查是否有下一页
                 try:
-                    # 使用更稳定的 XPath 查找“下一页”按钮
+                    # 使用更稳定的 XPath 查找“下一页”按钮，并判断其是否可用
                     next_button = driver.find_element(By.XPATH, "//div[@id='pageBar']//a[text()='下一页']")
+                    if 'nolink' in next_button.get_attribute('class'):
+                        logger.info("基金 %s 已到达最后一页", fund_code)
+                        break
                     
                     # 使用JavaScript点击，更可靠
                     driver.execute_script("arguments[0].click();", next_button)
@@ -214,9 +217,9 @@ class MarketMonitor:
                     
                     latest_data = df.iloc[-1]
                     latest_net_value = latest_data['net_value']
-                    latest_rsi = rsi.iloc[-1] if not pd.isna(rsi.iloc[-1]) else float('nan')
+                    latest_rsi = rsi.iloc[-1] if not pd.isna(rsi.iloc[-1]) else np.nan
                     latest_ma50 = ma50.iloc[-1]
-                    latest_ma50_ratio = latest_net_value / latest_ma50 if not pd.isna(latest_ma50) and latest_ma50 != 0 else float('nan')
+                    latest_ma50_ratio = latest_net_value / latest_ma50 if not pd.isna(latest_ma50) and latest_ma50 != 0 else np.nan
 
                     self.fund_data[fund_code] = {
                         'latest_net_value': latest_net_value,
@@ -252,16 +255,21 @@ class MarketMonitor:
                 f.write("| 无 | 无数据 | - | - | 请检查 analysis_report.md 是否包含有效基金代码 |\n")
             else:
                 for fund_code in self.fund_codes:
-                    if fund_code in self.fund_data and self.fund_data[fund_code]:
+                    if fund_code in self.fund_data and self.fund_data[fund_code] is not None:
                         data = self.fund_data[fund_code]
                         rsi = data['rsi']
                         ma_ratio = data['ma_ratio']
+
+                        # 使用更安全的格式化逻辑
+                        rsi_str = f"{rsi:.2f}" if not np.isnan(rsi) else "N/A"
+                        ma_ratio_str = f"{ma_ratio:.2f}" if not np.isnan(ma_ratio) else "N/A"
+
                         advice = (
-                            "等待回调" if not pd.isna(rsi) and rsi > 70 or not pd.isna(ma_ratio) and ma_ratio > 1.2 else
-                            "可分批买入" if (pd.isna(rsi) or 30 <= rsi <= 70) and (pd.isna(ma_ratio) or 0.8 <= ma_ratio <= 1.2) else
-                            "可加仓" if not pd.isna(rsi) and rsi < 30 else "观察"
+                            "等待回调" if not np.isnan(rsi) and rsi > 70 or not np.isnan(ma_ratio) and ma_ratio > 1.2 else
+                            "可分批买入" if (np.isnan(rsi) or 30 <= rsi <= 70) and (np.isnan(ma_ratio) or 0.8 <= ma_ratio <= 1.2) else
+                            "可加仓" if not np.isnan(rsi) and rsi < 30 else "观察"
                         )
-                        f.write(f"| {fund_code} | {data['latest_net_value']:.4f} | {rsi:.2f if not pd.isna(rsi) else 'N/A'} | {ma_ratio:.2f if not pd.isna(ma_ratio) else 'N/A'} | {advice} |\n")
+                        f.write(f"| {fund_code} | {data['latest_net_value']:.4f} | {rsi_str} | {ma_ratio_str} | {advice} |\n")
                     else:
                         f.write(f"| {fund_code} | 数据获取失败 | - | - | 观察 |\n")
         
