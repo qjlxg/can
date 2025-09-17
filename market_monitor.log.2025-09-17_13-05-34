@@ -1,5 +1,0 @@
-2025-09-17 13:05:34,679 - INFO - 访问URL: https://www.dayfund.cn/fundvalue/011892.html
-2025-09-17 13:05:34,689 - INFO - 表格元素加载完成
-2025-09-17 13:05:34,696 - ERROR - Selenium 抓取基金 011892 失败: Missing optional dependency 'html5lib'.  Use pip or conda to install html5lib.
-2025-09-17 13:05:34,703 - INFO - 错误页面已保存到 error_page_011892.html
-2025-09-17 13:05:34,762 - WARNING - 基金 011892 数据获取失败或数据不足，跳过计算 (数据行数: 0)
