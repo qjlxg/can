@@ -13,7 +13,7 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 5  # 整体超时 5 分钟
+    timeout-minutes: 10  # 增加超时时间以适应翻页
 
     steps:
       - name: Checkout repository
@@ -75,7 +75,7 @@ jobs:
 
       - name: Run Market Monitor script
         run: |
-          timeout 240 python market_monitor.py || { echo "Script timed out or failed, check market_monitor.log"; cat market_monitor.log 2>/dev/null || echo "No log file generated"; exit 1; }  # 4分钟超时
+          timeout 540 python market_monitor.py || { echo "Script timed out or failed, check market_monitor.log"; cat market_monitor.log 2>/dev/null || echo "No log file generated"; exit 1; }  # 9分钟超时
 
       - name: Check generated files
         run: |
@@ -102,7 +102,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add --all -- ':!market_monitor.log' ':!*.html'  # 排除日志和 HTML 文件
+          git add market_monitor_report.md  # 仅推送报告文件
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
