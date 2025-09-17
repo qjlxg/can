@@ -7,6 +7,13 @@ from datetime import datetime, timedelta
 import time
 import random
 from io import StringIO
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchElementException, StaleElementReferenceException
 import requests
 import tenacity
 
@@ -28,26 +35,8 @@ class MarketMonitor:
         self.fund_codes = []
         self.fund_data = {}
 
-    def _validate_fund_code(self, fund_code):
-        """验证基金代码是否有效"""
-        try:
-            url = f"http://fund.eastmoney.com/{fund_code}.html"
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
-            }
-            response = requests.head(url, headers=headers, timeout=5)
-            if response.status_code == 200:
-                logger.info("基金代码 %s 有效", fund_code)
-                return True
-            else:
-                logger.warning("基金代码 %s 无效，状态码: %d", fund_code, response.status_code)
-                return False
-        except Exception as e:
-            logger.warning("验证基金代码 %s 失败: %s", fund_code, str(e))
-            return False
-
     def _parse_report(self):
-        """从 analysis_report.md 提取推荐基金代码并验证"""
+        """从 analysis_report.md 提取推荐基金代码"""
         logger.info("正在解析 %s 获取推荐基金代码...", self.report_file)
         if not os.path.exists(self.report_file):
             logger.error("报告文件 %s 不存在", self.report_file)
@@ -58,22 +47,16 @@ class MarketMonitor:
                 content = f.read()
             logger.info("analysis_report.md 内容（前1000字符）: %s", content[:1000])
             
-            pattern = r'\| *(\d{6}) *\|.*?\|'
-            matches = re.findall(pattern, content, re.MULTILINE)
+            # 使用更宽泛的模式来匹配所有可能的基金代码
+            pattern = r'(\d{6})'
+            matches = re.findall(pattern, content)
             self.fund_codes = list(set(matches))  # 去重
             
-            # 验证基金代码
-            valid_codes = []
-            for code in self.fund_codes:
-                if self._validate_fund_code(code):
-                    valid_codes.append(code)
-                time.sleep(random.uniform(0.5, 1))  # 避免请求过快
-            
-            self.fund_codes = valid_codes[:10]  # 限制前10个有效代码
+            self.fund_codes = self.fund_codes[:10]  # 限制前10个有效代码
             if not self.fund_codes:
                 logger.warning("未提取到任何有效基金代码，请检查 analysis_report.md")
             else:
-                logger.info("提取到 %d 个有效基金（测试限制前10个）: %s", len(self.fund_codes), self.fund_codes)
+                logger.info("提取到 %d 个基金（测试限制前10个）: %s", len(self.fund_codes), self.fund_codes)
             for handler in logger.handlers:
                 handler.flush()
             
@@ -84,61 +67,121 @@ class MarketMonitor:
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(3),
         wait=tenacity.wait_fixed(2),
-        retry=tenacity.retry_if_exception_type(requests.exceptions.RequestException),
-        before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[0]}，第 {retry_state.attempt_number} 次")
+        retry=tenacity.retry_if_exception_type((TimeoutException, WebDriverException)),
+        before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[1]}，第 {retry_state.attempt_number} 次")
     )
     def _get_fund_data_from_eastmoney(self, fund_code):
-        """
-        通过天天基金网的 API 接口获取基金历史净值数据。
-        更稳定，无需依赖浏览器驱动。
-        """
-        logger.info("正在通过 API 获取基金 %s 的净值数据...", fund_code)
+        """使用 Selenium 从 fund.eastmoney.com 抓取基金历史净值数据（含翻页）"""
+        logger.info("正在获取基金 %s 的净值数据...", fund_code)
         
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-            'Referer': f'http://fundf10.eastmoney.com/jjjz_{fund_code}.html'
-        }
-        
-        # 抓取最近一年的数据，足够计算技术指标
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=365)
-        
-        url = "http://api.fund.eastmoney.com/f10/lsjz"
-        params = {
-            'fundCode': fund_code,
-            'pageIndex': 1,
-            'pageSize': 2000, # 一次性获取足够多的数据，避免翻页
-            'startDate': start_date.strftime('%Y-%m-%d'),
-            'endDate': end_date.strftime('%Y-%m-%d')
-        }
-        
+        driver = None
         try:
-            response = requests.get(url, params=params, headers=headers, timeout=10)
-            response.raise_for_status()
-            data = response.json()
+            options = webdriver.ChromeOptions()
+            options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+            options.add_argument('--disable-gpu')
+            options.add_argument('--window-size=1920,1080')
+            options.add_argument('--disable-extensions')
+            options.add_argument('--disable-infobars')
+            options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36')
             
-            if data['Data'] and 'LSJZList' in data['Data']:
-                df = pd.DataFrame(data['Data']['LSJZList'])
-                df['FSRQ'] = pd.to_datetime(df['FSRQ'])
-                df['DWJZ'] = pd.to_numeric(df['DWJZ'], errors='coerce')
-                df = df.rename(columns={'FSRQ': 'date', 'DWJZ': 'net_value'})
-                
-                # 清洗数据并按日期排序
-                df = df.dropna(subset=['date', 'net_value'])
-                df = df.sort_values(by='date', ascending=True).drop_duplicates(subset=['date'])
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            
+            url = f"http://fundf10.eastmoney.com/jjjz_{fund_code}.html"
+            driver.set_page_load_timeout(15)  # 页面加载超时15秒
+            driver.get(url)
+            logger.info("访问URL: %s", url)
 
-                logger.info("成功通过 API 获取基金 %s 的数据，行数: %d, 最新日期: %s, 最新净值: %.4f", 
+            # 等待表格容器加载，并确保内容可见
+            wait = WebDriverWait(driver, 15)
+            wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
+            logger.info("历史净值表格容器加载完成并可见")
+
+            all_data = []
+            
+            while True:
+                # 解析当前页面表格
+                try:
+                    table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
+                    # 检查是否有数据加载，避免解析空表格
+                    if '数据加载中' in table_html or not table_html.strip():
+                        logger.warning("基金 %s 页面表格内容为空或仍在加载，等待...", fund_code)
+                        time.sleep(2) # 再次等待
+                        table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
+
+                    df_list = pd.read_html(StringIO(table_html), flavor='lxml')
+                    if not df_list:
+                        raise ValueError("未找到任何表格")
+                    
+                    df = df_list[0]
+                    df = df.iloc[:, [0, 1]]  # 只取日期和单位净值
+                    df.columns = ['date', 'net_value']
+                    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+                    df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
+                    df = df.dropna(subset=['date', 'net_value'])
+                    all_data.append(df)
+                    logger.info("解析基金 %s 当前页面，获取 %d 行数据", fund_code, len(df))
+                
+                except Exception as e:
+                    logger.error("解析基金 %s 当前页面失败: %s", fund_code, str(e))
+                    # 尝试保存页面源码和截图以供调试
+                    try:
+                        driver.save_screenshot(f"parse_error_{fund_code}.png")
+                        with open(f"parse_error_{fund_code}.html", "w", encoding="utf-8") as f:
+                            f.write(driver.page_source)
+                        logger.info("解析失败截图和页面已保存。")
+                    except:
+                        logger.warning("无法保存调试文件。")
+                    break
+
+                # 检查是否有下一页
+                try:
+                    # 查找下一页按钮，通常在 id='pageBar' 的div中
+                    next_button = driver.find_element(By.CSS_SELECTOR, '#pageBar a.page_next')
+                    if not next_button.is_enabled():
+                        logger.info("基金 %s 已到达最后一页", fund_code)
+                        break
+                    
+                    # 使用JavaScript点击，更可靠
+                    driver.execute_script("arguments[0].click();", next_button)
+                    time.sleep(random.uniform(1.5, 2.5))  # 等待页面加载
+                    wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
+                    logger.info("翻页成功")
+                
+                except (NoSuchElementException, StaleElementReferenceException):
+                    logger.info("基金 %s 无下一页按钮，或按钮已失效，结束翻页", fund_code)
+                    break
+                except Exception as e:
+                    logger.error("翻页失败: %s", str(e))
+                    break
+
+            if all_data:
+                df = pd.concat(all_data, ignore_index=True)
+                df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
+                df = df.tail(100)  # 取最近 100 天
+                logger.info("成功解析基金 %s 的数据，行数: %d, 最新日期: %s, 最新净值: %.4f", 
                             fund_code, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
                 return df[['date', 'net_value']]
             else:
-                raise ValueError("API 返回数据中没有找到历史净值列表")
+                raise ValueError("未获取到任何有效数据")
 
-        except requests.exceptions.RequestException as e:
-            logger.error("API 请求基金 %s 失败: %s", fund_code, str(e))
+        except Exception as e:
+            logger.error("Selenium 抓取基金 %s 失败: %s", fund_code, str(e))
+            if driver:
+                try:
+                    # 尝试保存截图和页面源码，以便调试
+                    driver.save_screenshot(f"error_screenshot_{fund_code}.png")
+                    with open(f"error_page_{fund_code}.html", "w", encoding="utf-8") as f:
+                        f.write(driver.page_source)
+                    logger.info("错误截图和页面已保存到 error_screenshot_%s.png 和 error_page_%s.html", fund_code, fund_code)
+                except:
+                    logger.warning("无法保存错误截图或页面源码")
             raise
-        except (ValueError, KeyError) as e:
-            logger.error("解析基金 %s 的 API 响应失败: %s", fund_code, str(e))
-            raise
+        finally:
+            if driver:
+                driver.quit()
 
     def get_fund_data(self):
         """获取所有基金的数据"""
