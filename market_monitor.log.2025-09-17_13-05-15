@@ -1,0 +1,25 @@
+2025-09-17 13:05:15,834 - ERROR - Selenium 抓取基金 013370 失败: Message: 
+Stacktrace:
+#0 0x5576ebc2194a <unknown>
+#1 0x5576eb6968a0 <unknown>
+#2 0x5576eb6e8540 <unknown>
+#3 0x5576eb6e8731 <unknown>
+#4 0x5576eb736824 <unknown>
+#5 0x5576eb70e05d <unknown>
+#6 0x5576eb733c23 <unknown>
+#7 0x5576eb70de03 <unknown>
+#8 0x5576eb6da968 <unknown>
+#9 0x5576eb6db5e1 <unknown>
+#10 0x5576ebbe5548 <unknown>
+#11 0x5576ebbe9272 <unknown>
+#12 0x5576ebbcc313 <unknown>
+#13 0x5576ebbe9dc5 <unknown>
+#14 0x5576ebbb149f <unknown>
+#15 0x5576ebc0e158 <unknown>
+#16 0x5576ebc0e332 <unknown>
+#17 0x5576ebc20a53 <unknown>
+#18 0x7f6d7449caa4 <unknown>
+#19 0x7f6d74529c3c <unknown>
+
+2025-09-17 13:05:15,837 - INFO - 错误页面已保存到 error_page_013370.html
+2025-09-17 13:05:15,901 - WARNING - 基金 013370 数据获取失败或数据不足，跳过计算 (数据行数: 0)

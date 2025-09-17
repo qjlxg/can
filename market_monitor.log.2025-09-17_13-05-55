@@ -1,0 +1,25 @@
+2025-09-17 13:05:55,744 - ERROR - Selenium 抓取基金 009492 失败: Message: 
+Stacktrace:
+#0 0x55a7f48eb94a <unknown>
+#1 0x55a7f43608a0 <unknown>
+#2 0x55a7f43b2540 <unknown>
+#3 0x55a7f43b2731 <unknown>
+#4 0x55a7f4400824 <unknown>
+#5 0x55a7f43d805d <unknown>
+#6 0x55a7f43fdc23 <unknown>
+#7 0x55a7f43d7e03 <unknown>
+#8 0x55a7f43a4968 <unknown>
+#9 0x55a7f43a55e1 <unknown>
+#10 0x55a7f48af548 <unknown>
+#11 0x55a7f48b3272 <unknown>
+#12 0x55a7f4896313 <unknown>
+#13 0x55a7f48b3dc5 <unknown>
+#14 0x55a7f487b49f <unknown>
+#15 0x55a7f48d8158 <unknown>
+#16 0x55a7f48d8332 <unknown>
+#17 0x55a7f48eaa53 <unknown>
+#18 0x7f2cb049caa4 <unknown>
+#19 0x7f2cb0529c3c <unknown>
+
+2025-09-17 13:05:55,746 - INFO - 错误页面已保存到 error_page_009492.html
+2025-09-17 13:05:55,810 - WARNING - 基金 009492 数据获取失败或数据不足，跳过计算 (数据行数: 0)
