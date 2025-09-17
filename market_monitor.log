@@ -1162,3 +1162,191 @@ Stacktrace:
 | 018115 | 数据获取失败 | - | - | 观察 |
 
 2025-09-17 14:29:04,890 - INFO - 脚本执行完成
+2025-09-17 14:31:46,456 - INFO - 脚本启动
+2025-09-17 14:31:46,456 - INFO - 正在解析 analysis_report.md 获取推荐基金代码...
+2025-09-17 14:31:46,456 - INFO - analysis_report.md 内容（前1000字符）: --- 批量基金分析报告 ---
+
+生成日期: 2025-09-17 15:31:43
+
+--- 汇总结果 ---
+
+### 推荐基金
+
+|   fund_code | fund_name                |   score |
+|------------:|:-------------------------|--------:|
+|      007509 | 华商润丰灵活配置混合C              |      63 |
+|      014728 | 易方达成长动力混合C               |      60 |
+|      015690 | 富国中小盘精选混合C               |      60 |
+|      015692 | 富国通胀通缩主题轮动混合C            |      59 |
+|      015715 | 富国成长动力混合C                |      58 |
+|      002771 | 安信新回报混合C                 |      57 |
+|      014318 | 广发价值领航一年持有混合C            |      57 |
+|      015686 | 富国新兴产业股票C                |      57 |
+|      015144 | 中欧智能制造混合C                |      57 |
+|      020671 | 易方达上证科创板芯片指数发起式C         |      54 |
+|      018836 | 广发成长启航混合C                |      54 |
+|      002170 | 东吴移动互联混合C                |      54 |
+|      019924 | 华泰柏瑞中证2000指数增强C          |      54 |
+|      020477 | 泰康半导体量化选股股票发起式C          |      54 |
+|      020629 | 汇添富上证科创板芯片ETF发起式联接C      |      54 |
+|      019514 | 交银荣鑫灵活配置混合C   
+2025-09-17 14:31:46,459 - INFO - 提取到 10 个基金（测试限制前10个）: ['001407', '001724', '002052', '002112', '002163', '002170', '002580', '002771', '005118', '005312']
+2025-09-17 14:31:46,459 - INFO - 开始获取 10 个基金的数据...
+2025-09-17 14:31:46,459 - INFO - 处理第 1/10 个基金: 001407
+2025-09-17 14:31:46,459 - INFO - 正在获取基金 001407 的净值数据...
+2025-09-17 14:31:46,460 - INFO - ====== WebDriver manager ======
+2025-09-17 14:31:46,589 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:31:46,701 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:31:46,783 - INFO - There is no [linux64] chromedriver "140.0.7339.82" for browser google-chrome "140.0.7339" in cache
+2025-09-17 14:31:46,784 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:31:46,996 - INFO - WebDriver version 140.0.7339.82 selected
+2025-09-17 14:31:47,003 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.82/linux64/chromedriver-linux64.zip
+2025-09-17 14:31:47,003 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.82/linux64/chromedriver-linux64.zip
+2025-09-17 14:31:47,073 - INFO - Driver downloading response is 200
+2025-09-17 14:31:47,181 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:31:47,380 - INFO - Driver has been saved in cache [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82]
+2025-09-17 14:31:54,621 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_001407.html
+2025-09-17 14:31:54,639 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:31:54,651 - ERROR - 解析基金 001407 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:31:54,772 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:31:54,772 - ERROR - Selenium 抓取基金 001407 失败: 未获取到任何有效数据
+2025-09-17 14:31:54,873 - INFO - 错误截图和页面已保存到 error_screenshot_001407.png 和 error_page_001407.html
+2025-09-17 14:31:54,934 - ERROR - 处理基金 001407 时发生异常: 未获取到任何有效数据
+2025-09-17 14:31:54,934 - INFO - 处理第 2/10 个基金: 001724
+2025-09-17 14:31:54,934 - INFO - 正在获取基金 001724 的净值数据...
+2025-09-17 14:31:54,934 - INFO - ====== WebDriver manager ======
+2025-09-17 14:31:55,000 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:31:55,081 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:31:55,167 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:31:59,333 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_001724.html
+2025-09-17 14:31:59,351 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:31:59,364 - ERROR - 解析基金 001724 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:31:59,489 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:31:59,489 - ERROR - Selenium 抓取基金 001724 失败: 未获取到任何有效数据
+2025-09-17 14:31:59,590 - INFO - 错误截图和页面已保存到 error_screenshot_001724.png 和 error_page_001724.html
+2025-09-17 14:31:59,651 - ERROR - 处理基金 001724 时发生异常: 未获取到任何有效数据
+2025-09-17 14:31:59,651 - INFO - 处理第 3/10 个基金: 002052
+2025-09-17 14:31:59,651 - INFO - 正在获取基金 002052 的净值数据...
+2025-09-17 14:31:59,651 - INFO - ====== WebDriver manager ======
+2025-09-17 14:31:59,717 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:31:59,798 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:31:59,880 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:32:03,328 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002052.html
+2025-09-17 14:32:03,345 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:32:03,356 - ERROR - 解析基金 002052 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:32:03,473 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:32:03,473 - ERROR - Selenium 抓取基金 002052 失败: 未获取到任何有效数据
+2025-09-17 14:32:03,589 - INFO - 错误截图和页面已保存到 error_screenshot_002052.png 和 error_page_002052.html
+2025-09-17 14:32:03,652 - ERROR - 处理基金 002052 时发生异常: 未获取到任何有效数据
+2025-09-17 14:32:03,652 - INFO - 处理第 4/10 个基金: 002112
+2025-09-17 14:32:03,652 - INFO - 正在获取基金 002112 的净值数据...
+2025-09-17 14:32:03,652 - INFO - ====== WebDriver manager ======
+2025-09-17 14:32:03,719 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:03,800 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:03,884 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:32:10,264 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002112.html
+2025-09-17 14:32:10,281 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:32:10,293 - ERROR - 解析基金 002112 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:32:10,405 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:32:10,405 - ERROR - Selenium 抓取基金 002112 失败: 未获取到任何有效数据
+2025-09-17 14:32:10,506 - INFO - 错误截图和页面已保存到 error_screenshot_002112.png 和 error_page_002112.html
+2025-09-17 14:32:10,568 - ERROR - 处理基金 002112 时发生异常: 未获取到任何有效数据
+2025-09-17 14:32:10,568 - INFO - 处理第 5/10 个基金: 002163
+2025-09-17 14:32:10,568 - INFO - 正在获取基金 002163 的净值数据...
+2025-09-17 14:32:10,568 - INFO - ====== WebDriver manager ======
+2025-09-17 14:32:10,635 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:10,732 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:10,813 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:32:14,972 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002163.html
+2025-09-17 14:32:14,990 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:32:15,002 - ERROR - 解析基金 002163 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:32:15,124 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:32:15,124 - ERROR - Selenium 抓取基金 002163 失败: 未获取到任何有效数据
+2025-09-17 14:32:15,240 - INFO - 错误截图和页面已保存到 error_screenshot_002163.png 和 error_page_002163.html
+2025-09-17 14:32:15,302 - ERROR - 处理基金 002163 时发生异常: 未获取到任何有效数据
+2025-09-17 14:32:15,302 - INFO - 处理第 6/10 个基金: 002170
+2025-09-17 14:32:15,302 - INFO - 正在获取基金 002170 的净值数据...
+2025-09-17 14:32:15,303 - INFO - ====== WebDriver manager ======
+2025-09-17 14:32:15,368 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:15,448 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:15,528 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:32:19,396 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002170.html
+2025-09-17 14:32:19,415 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:32:19,427 - ERROR - 解析基金 002170 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:32:19,539 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:32:19,539 - ERROR - Selenium 抓取基金 002170 失败: 未获取到任何有效数据
+2025-09-17 14:32:19,639 - INFO - 错误截图和页面已保存到 error_screenshot_002170.png 和 error_page_002170.html
+2025-09-17 14:32:19,701 - ERROR - 处理基金 002170 时发生异常: 未获取到任何有效数据
+2025-09-17 14:32:19,701 - INFO - 处理第 7/10 个基金: 002580
+2025-09-17 14:32:19,701 - INFO - 正在获取基金 002580 的净值数据...
+2025-09-17 14:32:19,701 - INFO - ====== WebDriver manager ======
+2025-09-17 14:32:19,768 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:19,850 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:19,931 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:32:24,222 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002580.html
+2025-09-17 14:32:24,241 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:32:24,252 - ERROR - 解析基金 002580 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:32:24,371 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:32:24,371 - ERROR - Selenium 抓取基金 002580 失败: 未获取到任何有效数据
+2025-09-17 14:32:24,472 - INFO - 错误截图和页面已保存到 error_screenshot_002580.png 和 error_page_002580.html
+2025-09-17 14:32:24,533 - ERROR - 处理基金 002580 时发生异常: 未获取到任何有效数据
+2025-09-17 14:32:24,533 - INFO - 处理第 8/10 个基金: 002771
+2025-09-17 14:32:24,534 - INFO - 正在获取基金 002771 的净值数据...
+2025-09-17 14:32:24,534 - INFO - ====== WebDriver manager ======
+2025-09-17 14:32:24,599 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:24,680 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:24,759 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:32:29,792 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002771.html
+2025-09-17 14:32:29,809 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:32:29,820 - ERROR - 解析基金 002771 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:32:29,906 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:32:29,906 - ERROR - Selenium 抓取基金 002771 失败: 未获取到任何有效数据
+2025-09-17 14:32:30,019 - INFO - 错误截图和页面已保存到 error_screenshot_002771.png 和 error_page_002771.html
+2025-09-17 14:32:30,081 - ERROR - 处理基金 002771 时发生异常: 未获取到任何有效数据
+2025-09-17 14:32:30,081 - INFO - 处理第 9/10 个基金: 005118
+2025-09-17 14:32:30,081 - INFO - 正在获取基金 005118 的净值数据...
+2025-09-17 14:32:30,081 - INFO - ====== WebDriver manager ======
+2025-09-17 14:32:30,146 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:30,227 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:30,306 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:32:34,591 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_005118.html
+2025-09-17 14:32:34,608 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:32:34,619 - ERROR - 解析基金 005118 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:32:34,737 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:32:34,737 - ERROR - Selenium 抓取基金 005118 失败: 未获取到任何有效数据
+2025-09-17 14:32:34,836 - INFO - 错误截图和页面已保存到 error_screenshot_005118.png 和 error_page_005118.html
+2025-09-17 14:32:34,898 - ERROR - 处理基金 005118 时发生异常: 未获取到任何有效数据
+2025-09-17 14:32:34,898 - INFO - 处理第 10/10 个基金: 005312
+2025-09-17 14:32:34,898 - INFO - 正在获取基金 005312 的净值数据...
+2025-09-17 14:32:34,898 - INFO - ====== WebDriver manager ======
+2025-09-17 14:32:34,963 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:35,045 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:32:35,124 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:32:39,156 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_005312.html
+2025-09-17 14:32:39,174 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:32:39,185 - ERROR - 解析基金 005312 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:32:39,304 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:32:39,304 - ERROR - Selenium 抓取基金 005312 失败: 未获取到任何有效数据
+2025-09-17 14:32:39,403 - INFO - 错误截图和页面已保存到 error_screenshot_005312.png 和 error_page_005312.html
+2025-09-17 14:32:39,465 - ERROR - 处理基金 005312 时发生异常: 未获取到任何有效数据
+2025-09-17 14:32:39,465 - INFO - 正在生成市场监控报告...
+2025-09-17 14:32:39,465 - INFO - 报告生成完成: market_monitor_report.md
+2025-09-17 14:32:39,465 - INFO - market_monitor_report.md 内容: # 市场情绪与技术指标监控报告
+
+生成日期: 2025-09-17 14:32:39
+
+## 推荐基金技术指标 (处理基金数: 10)
+| 基金代码 | 最新净值 | RSI | 净值/MA50 | 投资建议 |
+|----------|----------|-----|-----------|----------|
+| 001407 | 数据获取失败 | - | - | 观察 |
+| 001724 | 数据获取失败 | - | - | 观察 |
+| 002052 | 数据获取失败 | - | - | 观察 |
+| 002112 | 数据获取失败 | - | - | 观察 |
+| 002163 | 数据获取失败 | - | - | 观察 |
+| 002170 | 数据获取失败 | - | - | 观察 |
+| 002580 | 数据获取失败 | - | - | 观察 |
+| 002771 | 数据获取失败 | - | - | 观察 |
+| 005118 | 数据获取失败 | - | - | 观察 |
+| 005312 | 数据获取失败 | - | - | 观察 |
+
+2025-09-17 14:32:39,465 - INFO - 脚本执行完成
