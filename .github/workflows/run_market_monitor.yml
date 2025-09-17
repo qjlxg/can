@@ -2,7 +2,7 @@ name: Run Market Monitor
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天 UTC 时间 0 点（北京时间 8 点）运行
+    - cron: '0 0 * * *'
   push:
     paths:
       - 'analysis_report.md'
@@ -13,6 +13,7 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # 整体超时 15 分钟
 
     steps:
       - name: Checkout repository
@@ -44,8 +45,8 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade pandas numpy requests beautifulsoup4 lxml selenium webdriver-manager
-          python -c "import pandas; import numpy; import requests; from bs4 import BeautifulSoup; import lxml; import selenium; from webdriver_manager.chrome import ChromeDriverManager; import pkg_resources; print(f'Dependencies installed successfully. Selenium version: {pkg_resources.get_distribution(\"selenium\").version}, Webdriver-Manager version: {pkg_resources.get_distribution(\"webdriver-manager\").version}')"
+          pip install --upgrade pandas==2.1.4 numpy requests beautifulsoup4 lxml selenium webdriver-manager  # 固定 pandas 版本避免警告
+          python -c "import pandas; import numpy; import requests; from bs4 import BeautifulSoup; import lxml; import selenium; from webdriver_manager.chrome import ChromeDriverManager; from io import StringIO; import pkg_resources; print(f'Dependencies installed successfully. Pandas version: {pkg_resources.get_distribution(\"pandas\").version}, Selenium version: {pkg_resources.get_distribution(\"selenium\").version}')"
 
       - name: Verify files exist
         run: |
@@ -72,12 +73,12 @@ jobs:
 
       - name: Run Market Monitor script
         run: |
-          python market_monitor.py || { echo "Script failed, check market_monitor.log"; cat market_monitor.log; exit 1; }
+          timeout 600 python market_monitor.py || { echo "Script timed out or failed, check market_monitor.log"; cat market_monitor.log 2>/dev/null || echo "No log file generated"; exit 1; }  # 10分钟超时
 
       - name: Check generated files
         run: |
           echo "Checking generated files:"
-          ls -l market_monitor_report.md market_monitor.log error_page_*.html || echo "Some files may not exist"
+          ls -l market_monitor_report.md market_monitor.log error_page_*.html 2>/dev/null || echo "Some files may not exist"
           if [ -f market_monitor_report.md ]; then
             echo "Contents of market_monitor_report.md:"
             cat market_monitor_report.md
