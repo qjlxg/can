@@ -148,11 +148,8 @@ class MarketMonitor:
 
                 # 检查是否有下一页
                 try:
-                    # 查找下一页按钮，通常在 id='pageBar' 的div中
-                    next_button = driver.find_element(By.CSS_SELECTOR, '#pageBar a.page_next')
-                    if not next_button.is_enabled():
-                        logger.info("基金 %s 已到达最后一页", fund_code)
-                        break
+                    # 使用更稳定的 XPath 查找“下一页”按钮
+                    next_button = driver.find_element(By.XPATH, "//div[@id='pageBar']//a[text()='下一页']")
                     
                     # 使用JavaScript点击，更可靠
                     driver.execute_script("arguments[0].click();", next_button)
