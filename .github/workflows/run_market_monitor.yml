@@ -59,6 +59,8 @@ jobs:
             exit 1
           fi
           echo "Required files found: analysis_report.md, market_monitor.py"
+          echo "Contents of analysis_report.md (first 1000 characters):"
+          head -c 1000 analysis_report.md
 
       - name: Verify market_monitor.py does not use akshare
         run: |
@@ -72,11 +74,24 @@ jobs:
         run: |
           python market_monitor.py || { echo "Script failed, check market_monitor.log"; cat market_monitor.log; exit 1; }
 
+      - name: Check generated files
+        run: |
+          echo "Checking generated files:"
+          ls -l market_monitor_report.md market_monitor.log error_page_*.html || echo "Some files may not exist"
+          if [ -f market_monitor_report.md ]; then
+            echo "Contents of market_monitor_report.md:"
+            cat market_monitor_report.md
+          fi
+          if [ -f market_monitor.log ]; then
+            echo "Contents of market_monitor.log:"
+            cat market_monitor.log
+          fi
+
       - name: Commit and push results
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add market_monitor_report.md market_monitor.log error_page_*.html || true
+          git add --all
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
