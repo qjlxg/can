@@ -407,3 +407,758 @@
 | 013239 | 数据获取失败 | - | - | 观察 |
 
 2025-09-17 14:18:20,143 - INFO - 脚本执行完成
+2025-09-17 14:21:57,602 - INFO - 脚本启动
+2025-09-17 14:21:57,602 - INFO - 正在解析 analysis_report.md 获取推荐基金代码...
+2025-09-17 14:21:57,603 - INFO - analysis_report.md 内容（前1000字符）: --- 批量基金分析报告 ---
+
+生成日期: 2025-09-17 15:31:43
+
+--- 汇总结果 ---
+
+### 推荐基金
+
+|   fund_code | fund_name                |   score |
+|------------:|:-------------------------|--------:|
+|      007509 | 华商润丰灵活配置混合C              |      63 |
+|      014728 | 易方达成长动力混合C               |      60 |
+|      015690 | 富国中小盘精选混合C               |      60 |
+|      015692 | 富国通胀通缩主题轮动混合C            |      59 |
+|      015715 | 富国成长动力混合C                |      58 |
+|      002771 | 安信新回报混合C                 |      57 |
+|      014318 | 广发价值领航一年持有混合C            |      57 |
+|      015686 | 富国新兴产业股票C                |      57 |
+|      015144 | 中欧智能制造混合C                |      57 |
+|      020671 | 易方达上证科创板芯片指数发起式C         |      54 |
+|      018836 | 广发成长启航混合C                |      54 |
+|      002170 | 东吴移动互联混合C                |      54 |
+|      019924 | 华泰柏瑞中证2000指数增强C          |      54 |
+|      020477 | 泰康半导体量化选股股票发起式C          |      54 |
+|      020629 | 汇添富上证科创板芯片ETF发起式联接C      |      54 |
+|      019514 | 交银荣鑫灵活配置混合C   
+2025-09-17 14:21:57,606 - INFO - 提取到 10 个基金（测试限制前10个）: ['386921', '563059', '360305', '521690', '011270', '021299', '106849', '482405', '040000', '018115']
+2025-09-17 14:21:57,606 - INFO - 开始获取 10 个基金的数据...
+2025-09-17 14:21:57,606 - INFO - 处理第 1/10 个基金: 386921
+2025-09-17 14:21:57,606 - INFO - 正在获取基金 386921 的净值数据...
+2025-09-17 14:21:57,606 - INFO - ====== WebDriver manager ======
+2025-09-17 14:21:58,896 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:21:58,952 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:21:58,997 - INFO - There is no [linux64] chromedriver "140.0.7339.82" for browser google-chrome "140.0.7339" in cache
+2025-09-17 14:21:58,997 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:21:59,121 - INFO - WebDriver version 140.0.7339.82 selected
+2025-09-17 14:21:59,126 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.82/linux64/chromedriver-linux64.zip
+2025-09-17 14:21:59,126 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.82/linux64/chromedriver-linux64.zip
+2025-09-17 14:21:59,177 - INFO - Driver downloading response is 200
+2025-09-17 14:21:59,251 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:21:59,410 - INFO - Driver has been saved in cache [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82]
+2025-09-17 14:22:07,995 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_386921.html
+2025-09-17 14:22:23,018 - ERROR - Selenium 抓取基金 386921 失败: Message: 
+Stacktrace:
+#0 0x557ada8d994a <unknown>
+#1 0x557ada34e8a0 <unknown>
+#2 0x557ada3a0540 <unknown>
+#3 0x557ada3a0731 <unknown>
+#4 0x557ada3ee824 <unknown>
+#5 0x557ada3c605d <unknown>
+#6 0x557ada3ebc23 <unknown>
+#7 0x557ada3c5e03 <unknown>
+#8 0x557ada392968 <unknown>
+#9 0x557ada3935e1 <unknown>
+#10 0x557ada89d548 <unknown>
+#11 0x557ada8a1272 <unknown>
+#12 0x557ada884313 <unknown>
+#13 0x557ada8a1dc5 <unknown>
+#14 0x557ada86949f <unknown>
+#15 0x557ada8c6158 <unknown>
+#16 0x557ada8c6332 <unknown>
+#17 0x557ada8d8a53 <unknown>
+#18 0x7f28ae69caa4 <unknown>
+#19 0x7f28ae729c3c <unknown>
+
+2025-09-17 14:22:23,236 - INFO - 错误截图和页面已保存到 error_screenshot_386921.png 和 error_page_386921.html
+2025-09-17 14:22:23,303 - INFO - 重试基金 386921，第 1 次
+2025-09-17 14:22:25,306 - INFO - 正在获取基金 386921 的净值数据...
+2025-09-17 14:22:25,306 - INFO - ====== WebDriver manager ======
+2025-09-17 14:22:25,371 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:22:25,417 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:22:25,468 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:22:27,188 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_386921.html
+2025-09-17 14:22:42,296 - ERROR - Selenium 抓取基金 386921 失败: Message: 
+Stacktrace:
+#0 0x5620163dc94a <unknown>
+#1 0x562015e518a0 <unknown>
+#2 0x562015ea3540 <unknown>
+#3 0x562015ea3731 <unknown>
+#4 0x562015ef1824 <unknown>
+#5 0x562015ec905d <unknown>
+#6 0x562015eeec23 <unknown>
+#7 0x562015ec8e03 <unknown>
+#8 0x562015e95968 <unknown>
+#9 0x562015e965e1 <unknown>
+#10 0x5620163a0548 <unknown>
+#11 0x5620163a4272 <unknown>
+#12 0x562016387313 <unknown>
+#13 0x5620163a4dc5 <unknown>
+#14 0x56201636c49f <unknown>
+#15 0x5620163c9158 <unknown>
+#16 0x5620163c9332 <unknown>
+#17 0x5620163dba53 <unknown>
+#18 0x7fad9d09caa4 <unknown>
+#19 0x7fad9d129c3c <unknown>
+
+2025-09-17 14:22:42,451 - INFO - 错误截图和页面已保存到 error_screenshot_386921.png 和 error_page_386921.html
+2025-09-17 14:22:42,517 - INFO - 重试基金 386921，第 2 次
+2025-09-17 14:22:44,519 - INFO - 正在获取基金 386921 的净值数据...
+2025-09-17 14:22:44,520 - INFO - ====== WebDriver manager ======
+2025-09-17 14:22:44,584 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:22:44,631 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:22:44,675 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:22:46,251 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_386921.html
+2025-09-17 14:23:01,760 - ERROR - Selenium 抓取基金 386921 失败: Message: 
+Stacktrace:
+#0 0x55ceda00394a <unknown>
+#1 0x55ced9a788a0 <unknown>
+#2 0x55ced9aca540 <unknown>
+#3 0x55ced9aca731 <unknown>
+#4 0x55ced9b18824 <unknown>
+#5 0x55ced9af005d <unknown>
+#6 0x55ced9b15c23 <unknown>
+#7 0x55ced9aefe03 <unknown>
+#8 0x55ced9abc968 <unknown>
+#9 0x55ced9abd5e1 <unknown>
+#10 0x55ced9fc7548 <unknown>
+#11 0x55ced9fcb272 <unknown>
+#12 0x55ced9fae313 <unknown>
+#13 0x55ced9fcbdc5 <unknown>
+#14 0x55ced9f9349f <unknown>
+#15 0x55ced9ff0158 <unknown>
+#16 0x55ced9ff0332 <unknown>
+#17 0x55ceda002a53 <unknown>
+#18 0x7f93f6e9caa4 <unknown>
+#19 0x7f93f6f29c3c <unknown>
+
+2025-09-17 14:23:01,917 - INFO - 错误截图和页面已保存到 error_screenshot_386921.png 和 error_page_386921.html
+2025-09-17 14:23:01,983 - ERROR - 处理基金 386921 时发生异常: RetryError[<Future at 0x7f9b2ad22410 state=finished raised TimeoutException>]
+2025-09-17 14:23:01,983 - INFO - 处理第 2/10 个基金: 563059
+2025-09-17 14:23:01,983 - INFO - 正在获取基金 563059 的净值数据...
+2025-09-17 14:23:01,983 - INFO - ====== WebDriver manager ======
+2025-09-17 14:23:02,048 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:23:02,096 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:23:02,153 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:23:03,890 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_563059.html
+2025-09-17 14:23:18,933 - ERROR - Selenium 抓取基金 563059 失败: Message: 
+Stacktrace:
+#0 0x55d441e2c94a <unknown>
+#1 0x55d4418a18a0 <unknown>
+#2 0x55d4418f3540 <unknown>
+#3 0x55d4418f3731 <unknown>
+#4 0x55d441941824 <unknown>
+#5 0x55d44191905d <unknown>
+#6 0x55d44193ec23 <unknown>
+#7 0x55d441918e03 <unknown>
+#8 0x55d4418e5968 <unknown>
+#9 0x55d4418e65e1 <unknown>
+#10 0x55d441df0548 <unknown>
+#11 0x55d441df4272 <unknown>
+#12 0x55d441dd7313 <unknown>
+#13 0x55d441df4dc5 <unknown>
+#14 0x55d441dbc49f <unknown>
+#15 0x55d441e19158 <unknown>
+#16 0x55d441e19332 <unknown>
+#17 0x55d441e2ba53 <unknown>
+#18 0x7f8b0ac9caa4 <unknown>
+#19 0x7f8b0ad29c3c <unknown>
+
+2025-09-17 14:23:19,144 - INFO - 错误截图和页面已保存到 error_screenshot_563059.png 和 error_page_563059.html
+2025-09-17 14:23:19,213 - INFO - 重试基金 563059，第 1 次
+2025-09-17 14:23:21,215 - INFO - 正在获取基金 563059 的净值数据...
+2025-09-17 14:23:21,216 - INFO - ====== WebDriver manager ======
+2025-09-17 14:23:21,281 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:23:21,327 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:23:21,373 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:23:23,903 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_563059.html
+2025-09-17 14:23:39,147 - ERROR - Selenium 抓取基金 563059 失败: Message: 
+Stacktrace:
+#0 0x55ac8a06994a <unknown>
+#1 0x55ac89ade8a0 <unknown>
+#2 0x55ac89b30540 <unknown>
+#3 0x55ac89b30731 <unknown>
+#4 0x55ac89b7e824 <unknown>
+#5 0x55ac89b5605d <unknown>
+#6 0x55ac89b7bc23 <unknown>
+#7 0x55ac89b55e03 <unknown>
+#8 0x55ac89b22968 <unknown>
+#9 0x55ac89b235e1 <unknown>
+#10 0x55ac8a02d548 <unknown>
+#11 0x55ac8a031272 <unknown>
+#12 0x55ac8a014313 <unknown>
+#13 0x55ac8a031dc5 <unknown>
+#14 0x55ac89ff949f <unknown>
+#15 0x55ac8a056158 <unknown>
+#16 0x55ac8a056332 <unknown>
+#17 0x55ac8a068a53 <unknown>
+#18 0x7f934a49caa4 <unknown>
+#19 0x7f934a529c3c <unknown>
+
+2025-09-17 14:23:39,368 - INFO - 错误截图和页面已保存到 error_screenshot_563059.png 和 error_page_563059.html
+2025-09-17 14:23:39,435 - INFO - 重试基金 563059，第 2 次
+2025-09-17 14:23:41,437 - INFO - 正在获取基金 563059 的净值数据...
+2025-09-17 14:23:41,437 - INFO - ====== WebDriver manager ======
+2025-09-17 14:23:41,502 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:23:41,550 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:23:41,597 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:23:43,264 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_563059.html
+2025-09-17 14:23:58,652 - ERROR - Selenium 抓取基金 563059 失败: Message: 
+Stacktrace:
+#0 0x555997a7d94a <unknown>
+#1 0x5559974f28a0 <unknown>
+#2 0x555997544540 <unknown>
+#3 0x555997544731 <unknown>
+#4 0x555997592824 <unknown>
+#5 0x55599756a05d <unknown>
+#6 0x55599758fc23 <unknown>
+#7 0x555997569e03 <unknown>
+#8 0x555997536968 <unknown>
+#9 0x5559975375e1 <unknown>
+#10 0x555997a41548 <unknown>
+#11 0x555997a45272 <unknown>
+#12 0x555997a28313 <unknown>
+#13 0x555997a45dc5 <unknown>
+#14 0x555997a0d49f <unknown>
+#15 0x555997a6a158 <unknown>
+#16 0x555997a6a332 <unknown>
+#17 0x555997a7ca53 <unknown>
+#18 0x7f60f7c9caa4 <unknown>
+#19 0x7f60f7d29c3c <unknown>
+
+2025-09-17 14:23:58,797 - INFO - 错误截图和页面已保存到 error_screenshot_563059.png 和 error_page_563059.html
+2025-09-17 14:23:58,864 - ERROR - 处理基金 563059 时发生异常: RetryError[<Future at 0x7f9b2ad235e0 state=finished raised TimeoutException>]
+2025-09-17 14:23:58,864 - INFO - 处理第 3/10 个基金: 360305
+2025-09-17 14:23:58,864 - INFO - 正在获取基金 360305 的净值数据...
+2025-09-17 14:23:58,865 - INFO - ====== WebDriver manager ======
+2025-09-17 14:23:58,930 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:23:58,976 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:23:59,023 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:24:00,752 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_360305.html
+2025-09-17 14:24:16,028 - ERROR - Selenium 抓取基金 360305 失败: Message: 
+Stacktrace:
+#0 0x560c0694a94a <unknown>
+#1 0x560c063bf8a0 <unknown>
+#2 0x560c06411540 <unknown>
+#3 0x560c06411731 <unknown>
+#4 0x560c0645f824 <unknown>
+#5 0x560c0643705d <unknown>
+#6 0x560c0645cc23 <unknown>
+#7 0x560c06436e03 <unknown>
+#8 0x560c06403968 <unknown>
+#9 0x560c064045e1 <unknown>
+#10 0x560c0690e548 <unknown>
+#11 0x560c06912272 <unknown>
+#12 0x560c068f5313 <unknown>
+#13 0x560c06912dc5 <unknown>
+#14 0x560c068da49f <unknown>
+#15 0x560c06937158 <unknown>
+#16 0x560c06937332 <unknown>
+#17 0x560c06949a53 <unknown>
+#18 0x7f6b4d09caa4 <unknown>
+#19 0x7f6b4d129c3c <unknown>
+
+2025-09-17 14:24:16,180 - INFO - 错误截图和页面已保存到 error_screenshot_360305.png 和 error_page_360305.html
+2025-09-17 14:24:16,247 - INFO - 重试基金 360305，第 1 次
+2025-09-17 14:24:18,249 - INFO - 正在获取基金 360305 的净值数据...
+2025-09-17 14:24:18,249 - INFO - ====== WebDriver manager ======
+2025-09-17 14:24:18,315 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:24:18,361 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:24:18,415 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:24:20,223 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_360305.html
+2025-09-17 14:24:35,570 - ERROR - Selenium 抓取基金 360305 失败: Message: 
+Stacktrace:
+#0 0x55ad2be5194a <unknown>
+#1 0x55ad2b8c68a0 <unknown>
+#2 0x55ad2b918540 <unknown>
+#3 0x55ad2b918731 <unknown>
+#4 0x55ad2b966824 <unknown>
+#5 0x55ad2b93e05d <unknown>
+#6 0x55ad2b963c23 <unknown>
+#7 0x55ad2b93de03 <unknown>
+#8 0x55ad2b90a968 <unknown>
+#9 0x55ad2b90b5e1 <unknown>
+#10 0x55ad2be15548 <unknown>
+#11 0x55ad2be19272 <unknown>
+#12 0x55ad2bdfc313 <unknown>
+#13 0x55ad2be19dc5 <unknown>
+#14 0x55ad2bde149f <unknown>
+#15 0x55ad2be3e158 <unknown>
+#16 0x55ad2be3e332 <unknown>
+#17 0x55ad2be50a53 <unknown>
+#18 0x7f4adc69caa4 <unknown>
+#19 0x7f4adc729c3c <unknown>
+
+2025-09-17 14:24:35,730 - INFO - 错误截图和页面已保存到 error_screenshot_360305.png 和 error_page_360305.html
+2025-09-17 14:24:35,796 - INFO - 重试基金 360305，第 2 次
+2025-09-17 14:24:37,798 - INFO - 正在获取基金 360305 的净值数据...
+2025-09-17 14:24:37,799 - INFO - ====== WebDriver manager ======
+2025-09-17 14:24:37,864 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:24:37,910 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:24:37,955 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:24:40,103 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_360305.html
+2025-09-17 14:24:55,110 - ERROR - Selenium 抓取基金 360305 失败: Message: 
+Stacktrace:
+#0 0x55909a98294a <unknown>
+#1 0x55909a3f78a0 <unknown>
+#2 0x55909a449540 <unknown>
+#3 0x55909a449731 <unknown>
+#4 0x55909a497824 <unknown>
+#5 0x55909a46f05d <unknown>
+#6 0x55909a494c23 <unknown>
+#7 0x55909a46ee03 <unknown>
+#8 0x55909a43b968 <unknown>
+#9 0x55909a43c5e1 <unknown>
+#10 0x55909a946548 <unknown>
+#11 0x55909a94a272 <unknown>
+#12 0x55909a92d313 <unknown>
+#13 0x55909a94adc5 <unknown>
+#14 0x55909a91249f <unknown>
+#15 0x55909a96f158 <unknown>
+#16 0x55909a96f332 <unknown>
+#17 0x55909a981a53 <unknown>
+#18 0x7fd57d09caa4 <unknown>
+#19 0x7fd57d129c3c <unknown>
+
+2025-09-17 14:24:55,324 - INFO - 错误截图和页面已保存到 error_screenshot_360305.png 和 error_page_360305.html
+2025-09-17 14:24:55,390 - ERROR - 处理基金 360305 时发生异常: RetryError[<Future at 0x7f9b2ad22f50 state=finished raised TimeoutException>]
+2025-09-17 14:24:55,390 - INFO - 处理第 4/10 个基金: 521690
+2025-09-17 14:24:55,390 - INFO - 正在获取基金 521690 的净值数据...
+2025-09-17 14:24:55,390 - INFO - ====== WebDriver manager ======
+2025-09-17 14:24:55,456 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:24:55,501 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:24:55,547 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:24:58,223 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_521690.html
+2025-09-17 14:25:13,539 - ERROR - Selenium 抓取基金 521690 失败: Message: 
+Stacktrace:
+#0 0x55e986b3394a <unknown>
+#1 0x55e9865a88a0 <unknown>
+#2 0x55e9865fa540 <unknown>
+#3 0x55e9865fa731 <unknown>
+#4 0x55e986648824 <unknown>
+#5 0x55e98662005d <unknown>
+#6 0x55e986645c23 <unknown>
+#7 0x55e98661fe03 <unknown>
+#8 0x55e9865ec968 <unknown>
+#9 0x55e9865ed5e1 <unknown>
+#10 0x55e986af7548 <unknown>
+#11 0x55e986afb272 <unknown>
+#12 0x55e986ade313 <unknown>
+#13 0x55e986afbdc5 <unknown>
+#14 0x55e986ac349f <unknown>
+#15 0x55e986b20158 <unknown>
+#16 0x55e986b20332 <unknown>
+#17 0x55e986b32a53 <unknown>
+#18 0x7fab1569caa4 <unknown>
+#19 0x7fab15729c3c <unknown>
+
+2025-09-17 14:25:13,694 - INFO - 错误截图和页面已保存到 error_screenshot_521690.png 和 error_page_521690.html
+2025-09-17 14:25:13,760 - INFO - 重试基金 521690，第 1 次
+2025-09-17 14:25:15,762 - INFO - 正在获取基金 521690 的净值数据...
+2025-09-17 14:25:15,763 - INFO - ====== WebDriver manager ======
+2025-09-17 14:25:15,829 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:25:15,875 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:25:15,919 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:25:17,878 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_521690.html
+2025-09-17 14:25:33,084 - ERROR - Selenium 抓取基金 521690 失败: Message: 
+Stacktrace:
+#0 0x5605359ce94a <unknown>
+#1 0x5605354438a0 <unknown>
+#2 0x560535495540 <unknown>
+#3 0x560535495731 <unknown>
+#4 0x5605354e3824 <unknown>
+#5 0x5605354bb05d <unknown>
+#6 0x5605354e0c23 <unknown>
+#7 0x5605354bae03 <unknown>
+#8 0x560535487968 <unknown>
+#9 0x5605354885e1 <unknown>
+#10 0x560535992548 <unknown>
+#11 0x560535996272 <unknown>
+#12 0x560535979313 <unknown>
+#13 0x560535996dc5 <unknown>
+#14 0x56053595e49f <unknown>
+#15 0x5605359bb158 <unknown>
+#16 0x5605359bb332 <unknown>
+#17 0x5605359cda53 <unknown>
+#18 0x7f168609caa4 <unknown>
+#19 0x7f1686129c3c <unknown>
+
+2025-09-17 14:25:33,292 - INFO - 错误截图和页面已保存到 error_screenshot_521690.png 和 error_page_521690.html
+2025-09-17 14:25:33,358 - INFO - 重试基金 521690，第 2 次
+2025-09-17 14:25:35,361 - INFO - 正在获取基金 521690 的净值数据...
+2025-09-17 14:25:35,361 - INFO - ====== WebDriver manager ======
+2025-09-17 14:25:35,425 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:25:35,472 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:25:35,517 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:25:39,711 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_521690.html
+2025-09-17 14:25:54,907 - ERROR - Selenium 抓取基金 521690 失败: Message: 
+Stacktrace:
+#0 0x557b3874d94a <unknown>
+#1 0x557b381c28a0 <unknown>
+#2 0x557b38214540 <unknown>
+#3 0x557b38214731 <unknown>
+#4 0x557b38262824 <unknown>
+#5 0x557b3823a05d <unknown>
+#6 0x557b3825fc23 <unknown>
+#7 0x557b38239e03 <unknown>
+#8 0x557b38206968 <unknown>
+#9 0x557b382075e1 <unknown>
+#10 0x557b38711548 <unknown>
+#11 0x557b38715272 <unknown>
+#12 0x557b386f8313 <unknown>
+#13 0x557b38715dc5 <unknown>
+#14 0x557b386dd49f <unknown>
+#15 0x557b3873a158 <unknown>
+#16 0x557b3873a332 <unknown>
+#17 0x557b3874ca53 <unknown>
+#18 0x7f560a49caa4 <unknown>
+#19 0x7f560a529c3c <unknown>
+
+2025-09-17 14:25:55,060 - INFO - 错误截图和页面已保存到 error_screenshot_521690.png 和 error_page_521690.html
+2025-09-17 14:25:55,127 - ERROR - 处理基金 521690 时发生异常: RetryError[<Future at 0x7f9b2ad23520 state=finished raised TimeoutException>]
+2025-09-17 14:25:55,128 - INFO - 处理第 5/10 个基金: 011270
+2025-09-17 14:25:55,128 - INFO - 正在获取基金 011270 的净值数据...
+2025-09-17 14:25:55,128 - INFO - ====== WebDriver manager ======
+2025-09-17 14:25:55,195 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:25:55,243 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:25:55,288 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:26:01,166 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_011270.html
+2025-09-17 14:26:01,190 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:26:01,202 - ERROR - 解析基金 011270 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:26:01,305 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:26:01,305 - ERROR - Selenium 抓取基金 011270 失败: 未获取到任何有效数据
+2025-09-17 14:26:01,403 - INFO - 错误截图和页面已保存到 error_screenshot_011270.png 和 error_page_011270.html
+2025-09-17 14:26:01,465 - ERROR - 处理基金 011270 时发生异常: 未获取到任何有效数据
+2025-09-17 14:26:01,465 - INFO - 处理第 6/10 个基金: 021299
+2025-09-17 14:26:01,465 - INFO - 正在获取基金 021299 的净值数据...
+2025-09-17 14:26:01,465 - INFO - ====== WebDriver manager ======
+2025-09-17 14:26:01,532 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:26:01,578 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:26:01,622 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:26:06,027 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_021299.html
+2025-09-17 14:26:06,043 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:26:06,055 - ERROR - 解析基金 021299 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:26:06,170 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:26:06,170 - ERROR - Selenium 抓取基金 021299 失败: 未获取到任何有效数据
+2025-09-17 14:26:06,269 - INFO - 错误截图和页面已保存到 error_screenshot_021299.png 和 error_page_021299.html
+2025-09-17 14:26:06,330 - ERROR - 处理基金 021299 时发生异常: 未获取到任何有效数据
+2025-09-17 14:26:06,330 - INFO - 处理第 7/10 个基金: 106849
+2025-09-17 14:26:06,330 - INFO - 正在获取基金 106849 的净值数据...
+2025-09-17 14:26:06,331 - INFO - ====== WebDriver manager ======
+2025-09-17 14:26:06,396 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:26:06,442 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:26:06,486 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:26:09,350 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_106849.html
+2025-09-17 14:26:24,716 - ERROR - Selenium 抓取基金 106849 失败: Message: 
+Stacktrace:
+#0 0x562a2907d94a <unknown>
+#1 0x562a28af28a0 <unknown>
+#2 0x562a28b44540 <unknown>
+#3 0x562a28b44731 <unknown>
+#4 0x562a28b92824 <unknown>
+#5 0x562a28b6a05d <unknown>
+#6 0x562a28b8fc23 <unknown>
+#7 0x562a28b69e03 <unknown>
+#8 0x562a28b36968 <unknown>
+#9 0x562a28b375e1 <unknown>
+#10 0x562a29041548 <unknown>
+#11 0x562a29045272 <unknown>
+#12 0x562a29028313 <unknown>
+#13 0x562a29045dc5 <unknown>
+#14 0x562a2900d49f <unknown>
+#15 0x562a2906a158 <unknown>
+#16 0x562a2906a332 <unknown>
+#17 0x562a2907ca53 <unknown>
+#18 0x7fa3e709caa4 <unknown>
+#19 0x7fa3e7129c3c <unknown>
+
+2025-09-17 14:26:24,859 - INFO - 错误截图和页面已保存到 error_screenshot_106849.png 和 error_page_106849.html
+2025-09-17 14:26:24,925 - INFO - 重试基金 106849，第 1 次
+2025-09-17 14:26:26,927 - INFO - 正在获取基金 106849 的净值数据...
+2025-09-17 14:26:26,928 - INFO - ====== WebDriver manager ======
+2025-09-17 14:26:26,993 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:26:27,040 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:26:27,084 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:26:29,048 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_106849.html
+2025-09-17 14:26:44,397 - ERROR - Selenium 抓取基金 106849 失败: Message: 
+Stacktrace:
+#0 0x55c04a4e294a <unknown>
+#1 0x55c049f578a0 <unknown>
+#2 0x55c049fa9540 <unknown>
+#3 0x55c049fa9731 <unknown>
+#4 0x55c049ff7824 <unknown>
+#5 0x55c049fcf05d <unknown>
+#6 0x55c049ff4c23 <unknown>
+#7 0x55c049fcee03 <unknown>
+#8 0x55c049f9b968 <unknown>
+#9 0x55c049f9c5e1 <unknown>
+#10 0x55c04a4a6548 <unknown>
+#11 0x55c04a4aa272 <unknown>
+#12 0x55c04a48d313 <unknown>
+#13 0x55c04a4aadc5 <unknown>
+#14 0x55c04a47249f <unknown>
+#15 0x55c04a4cf158 <unknown>
+#16 0x55c04a4cf332 <unknown>
+#17 0x55c04a4e1a53 <unknown>
+#18 0x7f90a029caa4 <unknown>
+#19 0x7f90a0329c3c <unknown>
+
+2025-09-17 14:26:44,540 - INFO - 错误截图和页面已保存到 error_screenshot_106849.png 和 error_page_106849.html
+2025-09-17 14:26:44,607 - INFO - 重试基金 106849，第 2 次
+2025-09-17 14:26:46,609 - INFO - 正在获取基金 106849 的净值数据...
+2025-09-17 14:26:46,609 - INFO - ====== WebDriver manager ======
+2025-09-17 14:26:46,674 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:26:46,720 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:26:46,764 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:26:48,510 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_106849.html
+2025-09-17 14:27:03,738 - ERROR - Selenium 抓取基金 106849 失败: Message: 
+Stacktrace:
+#0 0x562ae352994a <unknown>
+#1 0x562ae2f9e8a0 <unknown>
+#2 0x562ae2ff0540 <unknown>
+#3 0x562ae2ff0731 <unknown>
+#4 0x562ae303e824 <unknown>
+#5 0x562ae301605d <unknown>
+#6 0x562ae303bc23 <unknown>
+#7 0x562ae3015e03 <unknown>
+#8 0x562ae2fe2968 <unknown>
+#9 0x562ae2fe35e1 <unknown>
+#10 0x562ae34ed548 <unknown>
+#11 0x562ae34f1272 <unknown>
+#12 0x562ae34d4313 <unknown>
+#13 0x562ae34f1dc5 <unknown>
+#14 0x562ae34b949f <unknown>
+#15 0x562ae3516158 <unknown>
+#16 0x562ae3516332 <unknown>
+#17 0x562ae3528a53 <unknown>
+#18 0x7f47ea49caa4 <unknown>
+#19 0x7f47ea529c3c <unknown>
+
+2025-09-17 14:27:03,952 - INFO - 错误截图和页面已保存到 error_screenshot_106849.png 和 error_page_106849.html
+2025-09-17 14:27:04,018 - ERROR - 处理基金 106849 时发生异常: RetryError[<Future at 0x7f9b2ad23880 state=finished raised TimeoutException>]
+2025-09-17 14:27:04,018 - INFO - 处理第 8/10 个基金: 482405
+2025-09-17 14:27:04,019 - INFO - 正在获取基金 482405 的净值数据...
+2025-09-17 14:27:04,019 - INFO - ====== WebDriver manager ======
+2025-09-17 14:27:04,083 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:27:04,132 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:27:04,177 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:27:06,423 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_482405.html
+2025-09-17 14:27:21,830 - ERROR - Selenium 抓取基金 482405 失败: Message: 
+Stacktrace:
+#0 0x5603ac7be94a <unknown>
+#1 0x5603ac2338a0 <unknown>
+#2 0x5603ac285540 <unknown>
+#3 0x5603ac285731 <unknown>
+#4 0x5603ac2d3824 <unknown>
+#5 0x5603ac2ab05d <unknown>
+#6 0x5603ac2d0c23 <unknown>
+#7 0x5603ac2aae03 <unknown>
+#8 0x5603ac277968 <unknown>
+#9 0x5603ac2785e1 <unknown>
+#10 0x5603ac782548 <unknown>
+#11 0x5603ac786272 <unknown>
+#12 0x5603ac769313 <unknown>
+#13 0x5603ac786dc5 <unknown>
+#14 0x5603ac74e49f <unknown>
+#15 0x5603ac7ab158 <unknown>
+#16 0x5603ac7ab332 <unknown>
+#17 0x5603ac7bda53 <unknown>
+#18 0x7f10ab89caa4 <unknown>
+#19 0x7f10ab929c3c <unknown>
+
+2025-09-17 14:27:21,973 - INFO - 错误截图和页面已保存到 error_screenshot_482405.png 和 error_page_482405.html
+2025-09-17 14:27:22,039 - INFO - 重试基金 482405，第 1 次
+2025-09-17 14:27:24,041 - INFO - 正在获取基金 482405 的净值数据...
+2025-09-17 14:27:24,041 - INFO - ====== WebDriver manager ======
+2025-09-17 14:27:24,107 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:27:24,155 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:27:24,200 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:27:26,215 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_482405.html
+2025-09-17 14:27:41,643 - ERROR - Selenium 抓取基金 482405 失败: Message: 
+Stacktrace:
+#0 0x55be6b06294a <unknown>
+#1 0x55be6aad78a0 <unknown>
+#2 0x55be6ab29540 <unknown>
+#3 0x55be6ab29731 <unknown>
+#4 0x55be6ab77824 <unknown>
+#5 0x55be6ab4f05d <unknown>
+#6 0x55be6ab74c23 <unknown>
+#7 0x55be6ab4ee03 <unknown>
+#8 0x55be6ab1b968 <unknown>
+#9 0x55be6ab1c5e1 <unknown>
+#10 0x55be6b026548 <unknown>
+#11 0x55be6b02a272 <unknown>
+#12 0x55be6b00d313 <unknown>
+#13 0x55be6b02adc5 <unknown>
+#14 0x55be6aff249f <unknown>
+#15 0x55be6b04f158 <unknown>
+#16 0x55be6b04f332 <unknown>
+#17 0x55be6b061a53 <unknown>
+#18 0x7f7ec349caa4 <unknown>
+#19 0x7f7ec3529c3c <unknown>
+
+2025-09-17 14:27:41,851 - INFO - 错误截图和页面已保存到 error_screenshot_482405.png 和 error_page_482405.html
+2025-09-17 14:27:41,917 - INFO - 重试基金 482405，第 2 次
+2025-09-17 14:27:43,920 - INFO - 正在获取基金 482405 的净值数据...
+2025-09-17 14:27:43,920 - INFO - ====== WebDriver manager ======
+2025-09-17 14:27:43,986 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:27:44,033 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:27:44,078 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:27:45,980 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_482405.html
+2025-09-17 14:28:01,013 - ERROR - Selenium 抓取基金 482405 失败: Message: 
+Stacktrace:
+#0 0x55c159aba94a <unknown>
+#1 0x55c15952f8a0 <unknown>
+#2 0x55c159581540 <unknown>
+#3 0x55c159581731 <unknown>
+#4 0x55c1595cf824 <unknown>
+#5 0x55c1595a705d <unknown>
+#6 0x55c1595ccc23 <unknown>
+#7 0x55c1595a6e03 <unknown>
+#8 0x55c159573968 <unknown>
+#9 0x55c1595745e1 <unknown>
+#10 0x55c159a7e548 <unknown>
+#11 0x55c159a82272 <unknown>
+#12 0x55c159a65313 <unknown>
+#13 0x55c159a82dc5 <unknown>
+#14 0x55c159a4a49f <unknown>
+#15 0x55c159aa7158 <unknown>
+#16 0x55c159aa7332 <unknown>
+#17 0x55c159ab9a53 <unknown>
+#18 0x7f314749caa4 <unknown>
+#19 0x7f3147529c3c <unknown>
+
+2025-09-17 14:28:01,157 - INFO - 错误截图和页面已保存到 error_screenshot_482405.png 和 error_page_482405.html
+2025-09-17 14:28:01,224 - ERROR - 处理基金 482405 时发生异常: RetryError[<Future at 0x7f9b2add5060 state=finished raised TimeoutException>]
+2025-09-17 14:28:01,224 - INFO - 处理第 9/10 个基金: 040000
+2025-09-17 14:28:01,224 - INFO - 正在获取基金 040000 的净值数据...
+2025-09-17 14:28:01,224 - INFO - ====== WebDriver manager ======
+2025-09-17 14:28:01,289 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:28:01,335 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:28:01,383 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:28:03,230 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_040000.html
+2025-09-17 14:28:18,597 - ERROR - Selenium 抓取基金 040000 失败: Message: 
+Stacktrace:
+#0 0x55558f9f794a <unknown>
+#1 0x55558f46c8a0 <unknown>
+#2 0x55558f4be540 <unknown>
+#3 0x55558f4be731 <unknown>
+#4 0x55558f50c824 <unknown>
+#5 0x55558f4e405d <unknown>
+#6 0x55558f509c23 <unknown>
+#7 0x55558f4e3e03 <unknown>
+#8 0x55558f4b0968 <unknown>
+#9 0x55558f4b15e1 <unknown>
+#10 0x55558f9bb548 <unknown>
+#11 0x55558f9bf272 <unknown>
+#12 0x55558f9a2313 <unknown>
+#13 0x55558f9bfdc5 <unknown>
+#14 0x55558f98749f <unknown>
+#15 0x55558f9e4158 <unknown>
+#16 0x55558f9e4332 <unknown>
+#17 0x55558f9f6a53 <unknown>
+#18 0x7f0e7649caa4 <unknown>
+#19 0x7f0e76529c3c <unknown>
+
+2025-09-17 14:28:18,800 - INFO - 错误截图和页面已保存到 error_screenshot_040000.png 和 error_page_040000.html
+2025-09-17 14:28:18,867 - INFO - 重试基金 040000，第 1 次
+2025-09-17 14:28:20,869 - INFO - 正在获取基金 040000 的净值数据...
+2025-09-17 14:28:20,869 - INFO - ====== WebDriver manager ======
+2025-09-17 14:28:20,935 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:28:20,981 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:28:21,026 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:28:22,901 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_040000.html
+2025-09-17 14:28:38,024 - ERROR - Selenium 抓取基金 040000 失败: Message: 
+Stacktrace:
+#0 0x55ba12f6094a <unknown>
+#1 0x55ba129d58a0 <unknown>
+#2 0x55ba12a27540 <unknown>
+#3 0x55ba12a27731 <unknown>
+#4 0x55ba12a75824 <unknown>
+#5 0x55ba12a4d05d <unknown>
+#6 0x55ba12a72c23 <unknown>
+#7 0x55ba12a4ce03 <unknown>
+#8 0x55ba12a19968 <unknown>
+#9 0x55ba12a1a5e1 <unknown>
+#10 0x55ba12f24548 <unknown>
+#11 0x55ba12f28272 <unknown>
+#12 0x55ba12f0b313 <unknown>
+#13 0x55ba12f28dc5 <unknown>
+#14 0x55ba12ef049f <unknown>
+#15 0x55ba12f4d158 <unknown>
+#16 0x55ba12f4d332 <unknown>
+#17 0x55ba12f5fa53 <unknown>
+#18 0x7f518f29caa4 <unknown>
+#19 0x7f518f329c3c <unknown>
+
+2025-09-17 14:28:38,231 - INFO - 错误截图和页面已保存到 error_screenshot_040000.png 和 error_page_040000.html
+2025-09-17 14:28:38,298 - INFO - 重试基金 040000，第 2 次
+2025-09-17 14:28:40,300 - INFO - 正在获取基金 040000 的净值数据...
+2025-09-17 14:28:40,301 - INFO - ====== WebDriver manager ======
+2025-09-17 14:28:40,365 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:28:40,415 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:28:40,460 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:28:43,066 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_040000.html
+2025-09-17 14:28:58,496 - ERROR - Selenium 抓取基金 040000 失败: Message: 
+Stacktrace:
+#0 0x55733f58794a <unknown>
+#1 0x55733effc8a0 <unknown>
+#2 0x55733f04e540 <unknown>
+#3 0x55733f04e731 <unknown>
+#4 0x55733f09c824 <unknown>
+#5 0x55733f07405d <unknown>
+#6 0x55733f099c23 <unknown>
+#7 0x55733f073e03 <unknown>
+#8 0x55733f040968 <unknown>
+#9 0x55733f0415e1 <unknown>
+#10 0x55733f54b548 <unknown>
+#11 0x55733f54f272 <unknown>
+#12 0x55733f532313 <unknown>
+#13 0x55733f54fdc5 <unknown>
+#14 0x55733f51749f <unknown>
+#15 0x55733f574158 <unknown>
+#16 0x55733f574332 <unknown>
+#17 0x55733f586a53 <unknown>
+#18 0x7f9cd369caa4 <unknown>
+#19 0x7f9cd3729c3c <unknown>
+
+2025-09-17 14:28:58,708 - INFO - 错误截图和页面已保存到 error_screenshot_040000.png 和 error_page_040000.html
+2025-09-17 14:28:58,775 - ERROR - 处理基金 040000 时发生异常: RetryError[<Future at 0x7f9b2add5180 state=finished raised TimeoutException>]
+2025-09-17 14:28:58,775 - INFO - 处理第 10/10 个基金: 018115
+2025-09-17 14:28:58,775 - INFO - 正在获取基金 018115 的净值数据...
+2025-09-17 14:28:58,775 - INFO - ====== WebDriver manager ======
+2025-09-17 14:28:58,839 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:28:58,886 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-17 14:28:58,931 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
+2025-09-17 14:29:04,595 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_018115.html
+2025-09-17 14:29:04,612 - INFO - 历史净值表格容器加载完成并可见
+2025-09-17 14:29:04,624 - ERROR - 解析基金 018115 当前页面失败: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+2025-09-17 14:29:04,729 - INFO - 解析失败截图和页面已保存。
+2025-09-17 14:29:04,729 - ERROR - Selenium 抓取基金 018115 失败: 未获取到任何有效数据
+2025-09-17 14:29:04,828 - INFO - 错误截图和页面已保存到 error_screenshot_018115.png 和 error_page_018115.html
+2025-09-17 14:29:04,889 - ERROR - 处理基金 018115 时发生异常: 未获取到任何有效数据
+2025-09-17 14:29:04,890 - INFO - 正在生成市场监控报告...
+2025-09-17 14:29:04,890 - INFO - 报告生成完成: market_monitor_report.md
+2025-09-17 14:29:04,890 - INFO - market_monitor_report.md 内容: # 市场情绪与技术指标监控报告
+
+生成日期: 2025-09-17 14:29:04
+
+## 推荐基金技术指标 (处理基金数: 10)
+| 基金代码 | 最新净值 | RSI | 净值/MA50 | 投资建议 |
+|----------|----------|-----|-----------|----------|
+| 386921 | 数据获取失败 | - | - | 观察 |
+| 563059 | 数据获取失败 | - | - | 观察 |
+| 360305 | 数据获取失败 | - | - | 观察 |
+| 521690 | 数据获取失败 | - | - | 观察 |
+| 011270 | 数据获取失败 | - | - | 观察 |
+| 021299 | 数据获取失败 | - | - | 观察 |
+| 106849 | 数据获取失败 | - | - | 观察 |
+| 482405 | 数据获取失败 | - | - | 观察 |
+| 040000 | 数据获取失败 | - | - | 观察 |
+| 018115 | 数据获取失败 | - | - | 观察 |
+
+2025-09-17 14:29:04,890 - INFO - 脚本执行完成
