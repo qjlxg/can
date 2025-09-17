@@ -13,7 +13,7 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # 整体超时 10 分钟
+    timeout-minutes: 50  # 整体超时 50 分钟
 
     steps:
       - name: Checkout repository
@@ -31,22 +31,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Chrome and dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip fontconfig locales libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc-s1 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libnss3 lsb-release xdg-utils
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          echo "Chrome installed successfully"
-          google-chrome --version
-
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade pandas==2.1.4 numpy requests beautifulsoup4 lxml html5lib tenacity selenium webdriver-manager
-          python -c "import pandas, numpy, requests, bs4, lxml, html5lib, tenacity, selenium, webdriver_manager; import pkg_resources; print(f'Pandas: {pkg_resources.get_distribution(\"pandas\").version}, Selenium: {pkg_resources.get_distribution(\"selenium\").version}, html5lib: {pkg_resources.get_distribution(\"html5lib\").version}, tenacity: {pkg_resources.get_distribution(\"tenacity\").version}')"
+          pip install --upgrade pandas==2.1.4 numpy requests beautifulsoup4 lxml
+          python -c "import pandas, numpy, requests, bs4, lxml; import pkg_resources; print(f'Pandas: {pkg_resources.get_distribution(\"pandas\").version}, Requests: {pkg_resources.get_distribution(\"requests\").version}')"
 
       - name: Verify files exist
         run: |
@@ -63,22 +52,22 @@ jobs:
           echo "Contents of analysis_report.md (first 1000 characters):"
           head -c 1000 analysis_report.md
 
-      - name: Verify market_monitor.py does not use akshare
+      - name: Verify market_monitor.py does not use akshare or selenium
         run: |
-          if grep -q -i "akshare" market_monitor.py || grep -q "fund_open_fund_info_em" market_monitor.py; then
-            echo "Error: market_monitor.py contains akshare or fund_open_fund_info_em references!"
+          if grep -q -i "akshare" market_monitor.py || grep -q "selenium" market_monitor.py || grep -q "fund_open_fund_info_em" market_monitor.py; then
+            echo "Error: market_monitor.py contains akshare, selenium or fund_open_fund_info_em references!"
             exit 1
           fi
-          echo "market_monitor.py does not contain akshare references."
+          echo "market_monitor.py does not contain disallowed references."
 
       - name: Run Market Monitor script
         run: |
-          timeout 300 python market_monitor.py || { echo "Script timed out or failed, check market_monitor.log"; cat market_monitor.log 2>/dev/null || echo "No log file generated"; exit 1; }  # 5分钟超时
+          timeout 180 python market_monitor.py || { echo "Script timed out or failed, check market_monitor.log"; cat market_monitor.log 2>/dev/null || echo "No log file generated"; exit 1; }  # 3分钟超时
 
       - name: Check generated files
         run: |
           echo "Checking generated files:"
-          ls -l market_monitor_report.md market_monitor.log error_page_*.html 2>/dev/null || echo "Some files may not exist"
+          ls -l market_monitor_report.md market_monitor.log 2>/dev/null || echo "Some files may not exist"
           if [ -f market_monitor_report.md ]; then
             echo "Contents of market_monitor_report.md:"
             cat market_monitor_report.md
