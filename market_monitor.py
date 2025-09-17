@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchElementException
 import requests
 import tenacity
 
@@ -38,7 +38,7 @@ class MarketMonitor:
     def _validate_fund_code(self, fund_code):
         """验证基金代码是否有效"""
         try:
-            url = f"https://www.dayfund.cn/fundvalue/{fund_code}.html"
+            url = f"https://fund.10jqka.com.cn/{fund_code}/historynet.html"
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
             }
@@ -94,8 +94,8 @@ class MarketMonitor:
         retry=tenacity.retry_if_exception_type((TimeoutException, WebDriverException)),
         before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[1]}，第 {retry_state.attempt_number} 次")
     )
-    def _get_fund_data_from_dayfund(self, fund_code):
-        """使用 Selenium 从 dayfund.cn 抓取基金历史净值数据"""
+    def _get_fund_data_from_10jqka(self, fund_code):
+        """使用 Selenium 从 fund.10jqka.com.cn 抓取基金历史净值数据（含翻页）"""
         logger.info("正在获取基金 %s 的净值数据...", fund_code)
         
         driver = None
@@ -113,7 +113,7 @@ class MarketMonitor:
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=options)
             
-            url = f"https://www.dayfund.cn/fundvalue/{fund_code}.html"
+            url = f"https://fund.10jqka.com.cn/{fund_code}/historynet.html"
             driver.set_page_load_timeout(15)  # 页面加载超时15秒
             driver.get(url)
             logger.info("访问URL: %s", url)
@@ -122,49 +122,80 @@ class MarketMonitor:
                 lambda d: d.execute_script('return document.readyState') == 'complete'
             )
             wait = WebDriverWait(driver, 8)
-            table_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'table')))
-            logger.info("表格元素加载完成")
-            
-            # 保存调试页面
-            with open(f"debug_page_{fund_code}.html", "w", encoding="utf-8") as f:
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 's-list')))
+            logger.info("净值列表容器加载完成")
+
+            # 保存首页面用于调试
+            with open(f"debug_page_{fund_code}_page1.html", "w", encoding="utf-8") as f:
                 f.write(driver.page_source[:2000])
-            logger.info("调试页面已保存到 debug_page_%s.html", fund_code)
+            logger.info("调试页面已保存到 debug_page_%s_page1.html", fund_code)
+
+            # 初始化数据框
+            all_data = []
             
-            # 使用 lxml 解析器，失败则回退到 html5lib
- Addresses: 0x0
-            try:
-                df_list = pd.read_html(StringIO(driver.page_source), flavor='lxml')
-            except ValueError:
-                logger.info("lxml 解析失败，尝试 html5lib")
-                df_list = pd.read_html(StringIO(driver.page_source), flavor='html5lib')
-            
-            if not df_list:
-                raise ValueError("未找到任何表格")
-            
-            df = None
-            for temp_df in df_list:
-                if len(temp_df.columns) >= 4 and ('净值日期' in str(temp_df.columns) or '日期' in str(temp_df.iloc[0, 0]) if not temp_df.empty else False):
-                    df = temp_df
+            while True:
+                # 解析当前页面表格
+                try:
+                    table_element = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 's-list')))
+                    df_list = pd.read_html(StringIO(driver.page_source), flavor='lxml')
+                    if not df_list:
+                        raise ValueError("未找到任何表格")
+                    
+                    df = None
+                    for temp_df in df_list:
+                        if len(temp_df.columns) >= 2 and '日期' in str(temp_df.columns):
+                            df = temp_df
+                            break
+                    
+                    if df is None:
+                        raise ValueError("未找到有效的净值表格")
+                    
+                    df = df[['日期', '单位净值（元）']].copy()  # 只取日期和单位净值
+                    df.columns = ['date', 'net_value']
+                    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+                    df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
+                    df = df.dropna(subset=['date', 'net_value'])
+                    all_data.append(df)
+                    logger.info("解析基金 %s 当前页面，获取 %d 行数据", fund_code, len(df))
+                
+                except Exception as e:
+                    logger.error("解析基金 %s 当前页面失败: %s", fund_code, str(e))
                     break
-            
-            if df is None:
-                raise ValueError("未找到有效的净值表格")
-            
-            df = df.iloc[:, [0, 3]]  # 提取日期和净值列
-            df.columns = ['date', 'net_value']
-            
-            df['date'] = pd.to_datetime(df['date'], errors='coerce')
-            df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
-            df = df.dropna(subset=['date', 'net_value'])
-            df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
-            
-            if df.empty:
-                raise ValueError("清洗后数据为空")
-            
-            df = df.tail(100)
-            logger.info("成功解析基金 %s 的数据，行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                        fund_code, len(df), df['date'].iloc[-1], df['net_value'].iloc[-1])
-            return df[['date', 'net_value']]
+
+                # 检查是否有下一页
+                try:
+                    next_button = driver.find_element(By.XPATH, "//div[@id='m-turn']//a[contains(text(), '下一页')]")
+                    if 'disabled' in next_button.get_attribute('class') or not next_button.is_enabled():
+                        logger.info("基金 %s 已到达最后一页", fund_code)
+                        break
+                    next_button.click()
+                    time.sleep(random.uniform(1, 2))  # 等待页面加载
+                    WebDriverWait(driver, 8).until(
+                        EC.presence_of_element_located((By.CLASS_NAME, 's-list'))
+                    )
+                    # 保存翻页后的页面
+                    page_num = len(all_data) + 1
+                    with open(f"debug_page_{fund_code}_page{page_num}.html", "w", encoding="utf-8") as f:
+                        f.write(driver.page_source[:2000])
+                    logger.info("翻页成功，调试页面保存到 debug_page_%s_page%d.html", fund_code, page_num)
+                
+                except NoSuchElementException:
+                    logger.info("基金 %s 无下一页按钮，结束翻页", fund_code)
+                    break
+                except Exception as e:
+                    logger.error("翻页失败: %s", str(e))
+                    break
+
+            # 合并所有页面数据
+            if all_data:
+                df = pd.concat(all_data, ignore_index=True)
+                df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
+                df = df.tail(100)  # 取最近 100 天
+                logger.info("成功解析基金 %s 的数据，行数: %d, 最新日期: %s, 最新净值: %.4f", 
+                            fund_code, len(df), df['date'].iloc[-1], df['net_value'].iloc[-1])
+                return df[['date', 'net_value']]
+            else:
+                raise ValueError("未获取到任何有效数据")
 
         except Exception as e:
             logger.error("Selenium 抓取基金 %s 失败: %s", fund_code, str(e))
@@ -186,7 +217,7 @@ class MarketMonitor:
         for i, fund_code in enumerate(self.fund_codes, 1):
             try:
                 logger.info("处理第 %d/%d 个基金: %s", i, len(self.fund_codes), fund_code)
-                df = self._get_fund_data_from_dayfund(fund_code)
+                df = self._get_fund_data_from_10jqka(fund_code)
                 
                 if df is not None and not df.empty and len(df) >= 14:
                     df = df.sort_values(by='date', ascending=True)
