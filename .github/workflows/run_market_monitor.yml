@@ -13,7 +13,7 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # 增加超时时间以适应翻页
+    timeout-minutes: 15  # 增加超时时间以适应翻页
 
     steps:
       - name: Checkout repository
