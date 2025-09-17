@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchElementException, StaleElementReferenceException
 import requests
 import tenacity
 
@@ -179,8 +179,8 @@ class MarketMonitor:
                         f.write(driver.page_source[:2000])
                     logger.info("翻页成功，调试页面保存到 debug_page_%s_page%d.html", fund_code, page_num)
                 
-                except NoSuchElementException:
-                    logger.info("基金 %s 无下一页按钮，结束翻页", fund_code)
+                except (NoSuchElementException, StaleElementReferenceException):
+                    logger.info("基金 %s 无下一页按钮，或按钮已失效，结束翻页", fund_code)
                     break
                 except Exception as e:
                     logger.error("翻页失败: %s", str(e))
@@ -201,11 +201,13 @@ class MarketMonitor:
             logger.error("Selenium 抓取基金 %s 失败: %s", fund_code, str(e))
             if driver:
                 try:
+                    # 尝试保存截图和页面源码，以便调试
+                    driver.save_screenshot(f"error_screenshot_{fund_code}.png")
                     with open(f"error_page_{fund_code}.html", "w", encoding="utf-8") as f:
-                        f.write(driver.page_source[:2000])
-                    logger.info("错误页面已保存到 error_page_%s.html", fund_code)
+                        f.write(driver.page_source)
+                    logger.info("错误截图和页面已保存到 error_screenshot_%s.png 和 error_page_%s.html", fund_code, fund_code)
                 except:
-                    pass
+                    logger.warning("无法保存错误截图或页面源码")
             raise
         finally:
             if driver:
@@ -226,7 +228,9 @@ class MarketMonitor:
                     loss = -delta.where(delta < 0, 0)
                     avg_gain = gain.rolling(window=14, min_periods=1).mean()
                     avg_loss = loss.rolling(window=14, min_periods=1).mean()
-                    rs = avg_gain / avg_loss
+                    
+                    # 避免除以0
+                    rs = avg_gain / avg_loss.replace(0, np.nan)
                     rsi = 100 - (100 / (1 + rs))
                     
                     ma50 = df['net_value'].rolling(window=min(50, len(df)), min_periods=1).mean()
