@@ -14,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import TimeoutException, WebDriverException
+import requests
 import tenacity
 
 # 配置日志
@@ -34,8 +35,26 @@ class MarketMonitor:
         self.fund_codes = []
         self.fund_data = {}
 
+    def _validate_fund_code(self, fund_code):
+        """验证基金代码是否有效"""
+        try:
+            url = f"https://www.dayfund.cn/fundvalue/{fund_code}.html"
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
+            }
+            response = requests.head(url, headers=headers, timeout=5)
+            if response.status_code == 200:
+                logger.info("基金代码 %s 有效", fund_code)
+                return True
+            else:
+                logger.warning("基金代码 %s 无效，状态码: %d", fund_code, response.status_code)
+                return False
+        except Exception as e:
+            logger.warning("验证基金代码 %s 失败: %s", fund_code, str(e))
+            return False
+
     def _parse_report(self):
-        """从 analysis_report.md 提取推荐基金代码"""
+        """从 analysis_report.md 提取推荐基金代码并验证"""
         logger.info("正在解析 %s 获取推荐基金代码...", self.report_file)
         if not os.path.exists(self.report_file):
             logger.error("报告文件 %s 不存在", self.report_file)
@@ -49,12 +68,19 @@ class MarketMonitor:
             pattern = r'\| *(\d{6}) *\|.*?\|'
             matches = re.findall(pattern, content, re.MULTILINE)
             self.fund_codes = list(set(matches))  # 去重
-            # 限制前5个基金用于测试，生产时移除
-            self.fund_codes = self.fund_codes[:5]
+            
+            # 验证基金代码
+            valid_codes = []
+            for code in self.fund_codes:
+                if self._validate_fund_code(code):
+                    valid_codes.append(code)
+                time.sleep(random.uniform(0.5, 1))  # 避免请求过快
+            
+            self.fund_codes = valid_codes[:5]  # 限制前5个有效代码
             if not self.fund_codes:
-                logger.warning("未提取到任何基金代码，请检查 analysis_report.md 是否包含基金代码表格")
+                logger.warning("未提取到任何有效基金代码，请检查 analysis_report.md")
             else:
-                logger.info("提取到 %d 个推荐基金（测试限制前5个）: %s", len(self.fund_codes), self.fund_codes)
+                logger.info("提取到 %d 个有效基金（测试限制前5个）: %s", len(self.fund_codes), self.fund_codes)
             for handler in logger.handlers:
                 handler.flush()
             
@@ -88,23 +114,24 @@ class MarketMonitor:
             driver = webdriver.Chrome(service=service, options=options)
             
             url = f"https://www.dayfund.cn/fundvalue/{fund_code}.html"
-            driver.set_page_load_timeout(20)  # 页面加载超时20秒
+            driver.set_page_load_timeout(15)  # 页面加载超时15秒
             driver.get(url)
             logger.info("访问URL: %s", url)
 
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 8).until(
                 lambda d: d.execute_script('return document.readyState') == 'complete'
             )
-            wait = WebDriverWait(driver, 10)
+            wait = WebDriverWait(driver, 8)
             table_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'table')))
             logger.info("表格元素加载完成")
             
-            # 保存页面源码用于调试
+            # 保存调试页面
             with open(f"debug_page_{fund_code}.html", "w", encoding="utf-8") as f:
                 f.write(driver.page_source[:2000])
             logger.info("调试页面已保存到 debug_page_%s.html", fund_code)
             
             # 使用 lxml 解析器，失败则回退到 html5lib
+ Addresses: 0x0
             try:
                 df_list = pd.read_html(StringIO(driver.page_source), flavor='lxml')
             except ValueError:
