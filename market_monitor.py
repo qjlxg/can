@@ -38,7 +38,7 @@ class MarketMonitor:
     def _validate_fund_code(self, fund_code):
         """验证基金代码是否有效"""
         try:
-            url = f"https://fund.10jqka.com.cn/{fund_code}/historynet.html"
+            url = f"https://fund.eastmoney.com/{fund_code}.html"
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
             }
@@ -76,11 +76,11 @@ class MarketMonitor:
                     valid_codes.append(code)
                 time.sleep(random.uniform(0.5, 1))  # 避免请求过快
             
-            self.fund_codes = valid_codes[:5]  # 限制前5个有效代码
+            self.fund_codes = valid_codes[:10]  # 限制前10个有效代码
             if not self.fund_codes:
                 logger.warning("未提取到任何有效基金代码，请检查 analysis_report.md")
             else:
-                logger.info("提取到 %d 个有效基金（测试限制前5个）: %s", len(self.fund_codes), self.fund_codes)
+                logger.info("提取到 %d 个有效基金（测试限制前10个）: %s", len(self.fund_codes), self.fund_codes)
             for handler in logger.handlers:
                 handler.flush()
             
@@ -94,8 +94,8 @@ class MarketMonitor:
         retry=tenacity.retry_if_exception_type((TimeoutException, WebDriverException)),
         before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[1]}，第 {retry_state.attempt_number} 次")
     )
-    def _get_fund_data_from_10jqka(self, fund_code):
-        """使用 Selenium 从 fund.10jqka.com.cn 抓取基金历史净值数据（含翻页）"""
+    def _get_fund_data_from_eastmoney(self, fund_code):
+        """使用 Selenium 从 fund.eastmoney.com 抓取基金历史净值数据（含翻页）"""
         logger.info("正在获取基金 %s 的净值数据...", fund_code)
         
         driver = None
@@ -113,44 +113,28 @@ class MarketMonitor:
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=options)
             
-            url = f"https://fund.10jqka.com.cn/{fund_code}/historynet.html"
+            url = f"https://fundf10.eastmoney.com/jjjz_{fund_code}.html"
             driver.set_page_load_timeout(15)  # 页面加载超时15秒
             driver.get(url)
             logger.info("访问URL: %s", url)
 
-            WebDriverWait(driver, 8).until(
-                lambda d: d.execute_script('return document.readyState') == 'complete'
-            )
-            wait = WebDriverWait(driver, 8)
-            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 's-list')))
-            logger.info("净值列表容器加载完成")
+            # 等待表格加载
+            wait = WebDriverWait(driver, 10)
+            wait.until(EC.presence_of_element_located((By.ID, 'jztable')))
+            logger.info("历史净值表格容器加载完成")
 
-            # 保存首页面用于调试
-            with open(f"debug_page_{fund_code}_page1.html", "w", encoding="utf-8") as f:
-                f.write(driver.page_source[:2000])
-            logger.info("调试页面已保存到 debug_page_%s_page1.html", fund_code)
-
-            # 初始化数据框
             all_data = []
             
             while True:
                 # 解析当前页面表格
                 try:
-                    table_element = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 's-list')))
-                    df_list = pd.read_html(StringIO(driver.page_source), flavor='lxml')
+                    table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
+                    df_list = pd.read_html(StringIO(table_html), flavor='lxml')
                     if not df_list:
                         raise ValueError("未找到任何表格")
                     
-                    df = None
-                    for temp_df in df_list:
-                        if len(temp_df.columns) >= 2 and '日期' in str(temp_df.columns):
-                            df = temp_df
-                            break
-                    
-                    if df is None:
-                        raise ValueError("未找到有效的净值表格")
-                    
-                    df = df[['日期', '单位净值（元）']].copy()  # 只取日期和单位净值
+                    df = df_list[0]
+                    df = df.iloc[:, [0, 1]]  # 只取日期和单位净值
                     df.columns = ['date', 'net_value']
                     df['date'] = pd.to_datetime(df['date'], errors='coerce')
                     df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
@@ -164,20 +148,14 @@ class MarketMonitor:
 
                 # 检查是否有下一页
                 try:
-                    next_button = driver.find_element(By.XPATH, "//div[@id='m-turn']//a[contains(text(), '下一页')]")
-                    if 'disabled' in next_button.get_attribute('class') or not next_button.is_enabled():
+                    next_button = driver.find_element(By.LINK_TEXT, '下一页')
+                    if 'btn_next' in next_button.get_attribute('class'):
                         logger.info("基金 %s 已到达最后一页", fund_code)
                         break
                     next_button.click()
-                    time.sleep(random.uniform(1, 2))  # 等待页面加载
-                    WebDriverWait(driver, 8).until(
-                        EC.presence_of_element_located((By.CLASS_NAME, 's-list'))
-                    )
-                    # 保存翻页后的页面
-                    page_num = len(all_data) + 1
-                    with open(f"debug_page_{fund_code}_page{page_num}.html", "w", encoding="utf-8") as f:
-                        f.write(driver.page_source[:2000])
-                    logger.info("翻页成功，调试页面保存到 debug_page_%s_page%d.html", fund_code, page_num)
+                    time.sleep(random.uniform(1.5, 2.5))  # 等待页面加载
+                    wait.until(EC.presence_of_element_located((By.ID, 'jztable')))
+                    logger.info("翻页成功")
                 
                 except (NoSuchElementException, StaleElementReferenceException):
                     logger.info("基金 %s 无下一页按钮，或按钮已失效，结束翻页", fund_code)
@@ -186,13 +164,12 @@ class MarketMonitor:
                     logger.error("翻页失败: %s", str(e))
                     break
 
-            # 合并所有页面数据
             if all_data:
                 df = pd.concat(all_data, ignore_index=True)
                 df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
                 df = df.tail(100)  # 取最近 100 天
                 logger.info("成功解析基金 %s 的数据，行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                            fund_code, len(df), df['date'].iloc[-1], df['net_value'].iloc[-1])
+                            fund_code, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
                 return df[['date', 'net_value']]
             else:
                 raise ValueError("未获取到任何有效数据")
@@ -219,7 +196,7 @@ class MarketMonitor:
         for i, fund_code in enumerate(self.fund_codes, 1):
             try:
                 logger.info("处理第 %d/%d 个基金: %s", i, len(self.fund_codes), fund_code)
-                df = self._get_fund_data_from_10jqka(fund_code)
+                df = self._get_fund_data_from_eastmoney(fund_code)
                 
                 if df is not None and not df.empty and len(df) >= 14:
                     df = df.sort_values(by='date', ascending=True)
