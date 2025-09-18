@@ -9,7 +9,7 @@ from io import StringIO
 import requests
 import tenacity
 import concurrent.futures
-import time as time_module # 修复了这里的导入错误
+import time as time_module
 
 # 配置日志
 logging.basicConfig(
@@ -99,8 +99,6 @@ class MarketMonitor:
     )
     def _get_fund_data_from_api(self, fund_code):
         """优先使用本地缓存，仅在需要时增量更新或完整下载"""
-        logger.info("正在处理基金 %s 的数据...", fund_code)
-        
         local_df = self._read_local_data(fund_code)
         latest_local_date = local_df['date'].max().date() if not local_df.empty else None
         
@@ -108,15 +106,15 @@ class MarketMonitor:
         current_time = datetime.now().time()
         
         # 判断是否需要进行网络请求
-        is_up_to_date = latest_local_date is not None and latest_local_date >= today
-        is_after_update_time = current_time >= time(21, 0)
+        # 如果本地数据存在，且日期是今天，且时间早于21点，则直接使用本地数据并退出函数
+        is_up_to_date_and_before_21 = latest_local_date is not None and latest_local_date >= today and current_time < time(21, 0)
         
-        # 如果本地数据已是最新（包括当天），且时间早于更新点，则直接返回本地数据
-        if is_up_to_date and not is_after_update_time:
+        if is_up_to_date_and_before_21:
             logger.info(f"基金 {fund_code} 本地数据已是最新，且时间早于更新点，直接使用本地缓存。")
             return local_df.tail(100)[['date', 'net_value']]
         
-        # 从API获取新数据
+        # 以下代码只在需要更新数据时执行
+        logger.info("正在处理基金 %s 的数据...", fund_code)
         all_new_data = []
         page_index = 1
         
@@ -164,7 +162,7 @@ class MarketMonitor:
                 else:
                     # 如果本地没有数据，则获取所有历史数据
                     all_new_data.append(df)
-                    if len(df) < 20: # 历史数据获取完毕
+                    if len(df) < 20:
                         break
 
                 logger.info("基金 %s 总页数: %d, 当前页: %d, 当前页行数: %d", fund_code, total_pages, page_index, len(df))
@@ -174,7 +172,7 @@ class MarketMonitor:
                     break
                 
                 page_index += 1
-                time_module.sleep(random.uniform(0.5, 1.5)) # 修复了这里的 sleep 调用
+                time_module.sleep(random.uniform(0.5, 1.5))
                 
             except requests.exceptions.RequestException as e:
                 logger.error("基金 %s API请求失败: %s", fund_code, str(e))
