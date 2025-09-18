@@ -3,7 +3,7 @@ import numpy as np
 import re
 import os
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 import random
 from io import StringIO
@@ -16,7 +16,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import TimeoutException, WebDriverException
 import requests
 import tenacity
-import concurrent.futures # 导入多线程库
+import concurrent.futures
 
 # 配置日志
 logging.basicConfig(
@@ -53,7 +53,6 @@ class MarketMonitor:
                 content = f.read()
             logger.info("analysis_report.md 内容（前1000字符）: %s", content[:1000])
             
-            # 使用更精确的正则表达式来匹配基金代码
             pattern = re.compile(r'(?:^\| +(\d{6})|### 基金 (\d{6}))', re.M)
             matches = pattern.findall(content)
 
@@ -106,7 +105,7 @@ class MarketMonitor:
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(3),
         wait=tenacity.wait_fixed(5),
-        retry=tenacity.retry_if_exception_type((TimeoutException, WebDriverException)),
+        retry=tenacity.retry_if_exception_type((TimeoutException, WebDriverException, IndexError, Exception)), # 增加对 IndexEror 和更广泛的 Exception 的重试
         before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[1]}，第 {retry_state.attempt_number} 次")
     )
     def _get_fund_data_from_eastmoney(self, fund_code):
@@ -148,10 +147,20 @@ class MarketMonitor:
                     wait = WebDriverWait(driver, 30)
                     wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
                     logger.info("第 %d 页: 历史净值表格容器加载完成并可见", page_index)
-
-                    table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
-                    df_list = pd.read_html(StringIO(table_html), flavor='lxml')
                     
+                    # 尝试解析表格，如果失败则捕获 IndexEror
+                    try:
+                        table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
+                        df_list = pd.read_html(StringIO(table_html), flavor='lxml')
+                    except IndexError as e:
+                        logger.error("基金 %s 第 %d 页解析表格失败: %s", fund_code, page_index, str(e))
+                        # 尝试捕获是否有反爬页面
+                        if "验证码" in driver.page_source or "Access Denied" in driver.page_source:
+                            logger.error("检测到反爬措施，跳过此基金。")
+                            raise Exception("反爬措施")
+                        # 如果没有反爬措施，页面可能只是没有表格，继续正常处理
+                        df_list = []
+                        
                     if not df_list or df_list[0].empty:
                         logger.warning("第 %d 页: 表格内容为空，可能已无更多数据", page_index)
                         break
@@ -277,12 +286,9 @@ class MarketMonitor:
         """使用多线程获取所有基金的数据"""
         logger.info("开始使用多线程获取 %d 个基金的数据...", len(self.fund_codes))
         
-        # 限制线程数为 5，避免过多线程导致资源耗尽
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            # 使用 executor.map 将任务分发给线程池
             results = list(executor.map(self.process_fund, self.fund_codes))
 
-        # 收集结果
         self.fund_data = {
             result['fund_code']: {
                 'latest_net_value': result['latest_net_value'],
@@ -316,7 +322,6 @@ class MarketMonitor:
                         rsi = data['rsi']
                         ma_ratio = data['ma_ratio']
 
-                        # 使用更安全的格式化逻辑
                         rsi_str = f"{rsi:.2f}" if not np.isnan(rsi) else "N/A"
                         ma_ratio_str = f"{ma_ratio:.2f}" if not np.isnan(ma_ratio) else "N/A"
 
