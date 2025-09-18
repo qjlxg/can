@@ -271,10 +271,28 @@ class MarketMonitor:
                 }
             else:
                 logger.warning("基金 %s 数据获取失败或数据不足，跳过计算 (数据行数: %s)", fund_code, len(df) if df is not None else 0)
-                return None
+                return {
+                    'fund_code': fund_code,
+                    'latest_net_value': "数据获取失败",
+                    'rsi': "N/A",
+                    'ma_ratio': "N/A",
+                    'macd_diff': "N/A",
+                    'bb_upper': "N/A",
+                    'bb_lower': "N/A",
+                    'advice': "观察"
+                }
         except Exception as e:
             logger.error("处理基金 %s 时发生异常: %s", fund_code, str(e))
-            return None
+            return {
+                'fund_code': fund_code,
+                'latest_net_value': "数据获取失败",
+                'rsi': "N/A",
+                'ma_ratio': "N/A",
+                'macd_diff': "N/A",
+                'bb_upper': "N/A",
+                'bb_lower': "N/A",
+                'advice': "观察"
+            }
         finally:
             for handler in logger.handlers:
                 handler.flush()
