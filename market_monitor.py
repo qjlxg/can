@@ -279,14 +279,19 @@ class MarketMonitor:
         for fund_code in self.fund_codes:
             local_df = self._read_local_data(fund_code)
             
-            if not local_df.empty and local_df['date'].max().date() == today:
-                # 存在本地数据且为今日数据，直接加载并跳过网络请求
-                logger.info("基金 %s 的本地数据已是最新 (%s)，直接加载。", fund_code, local_df['date'].max().date())
-                self.fund_data[fund_code] = self._calculate_indicators(fund_code, local_df.tail(100))
+            if not local_df.empty:
+                latest_local_date = local_df['date'].max().date()
+                if latest_local_date >= today:
+                    logger.info("基金 %s 的本地数据已是最新 (%s)，直接加载。", fund_code, latest_local_date)
+                    self.fund_data[fund_code] = self._calculate_indicators(fund_code, local_df.tail(100))
+                    continue
+            
+            # 本地无数据或数据非最新，标记为需要网络获取
+            if not local_df.empty:
+                logger.info("基金 %s 本地数据已过时（最新日期为 %s），需要从网络获取新数据。", fund_code, latest_local_date)
             else:
-                # 本地无数据或数据非今日，标记为需要网络获取
-                logger.info("基金 %s 本地数据不存在或非最新，需要从网络获取。", fund_code)
-                fund_codes_to_fetch.append(fund_code)
+                logger.info("基金 %s 本地数据不存在，需要从网络获取。", fund_code)
+            fund_codes_to_fetch.append(fund_code)
 
         # 步骤2: 多线程网络下载
         if fund_codes_to_fetch:
