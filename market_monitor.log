@@ -1,6 +1,6 @@
-2025-09-18 00:32:24,822 - INFO - 脚本启动
-2025-09-18 00:32:24,822 - INFO - 正在解析 analysis_report.md 获取推荐基金代码...
-2025-09-18 00:32:24,823 - INFO - analysis_report.md 内容（前1000字符）: --- 批量基金分析报告 ---
+2025-09-18 00:43:21,575 - INFO - 脚本启动
+2025-09-18 00:43:21,575 - INFO - 正在解析 analysis_report.md 获取推荐基金代码...
+2025-09-18 00:43:21,576 - INFO - analysis_report.md 内容（前1000字符）: --- 批量基金分析报告 ---
 
 生成日期: 2025-09-17 15:31:43
 
@@ -26,370 +26,386 @@
 |      020477 | 泰康半导体量化选股股票发起式C          |      54 |
 |      020629 | 汇添富上证科创板芯片ETF发起式联接C      |      54 |
 |      019514 | 交银荣鑫灵活配置混合C   
-2025-09-18 00:32:24,826 - INFO - 提取到 10 个基金（测试限制前10个）: ['001407', '001724', '002052', '002112', '002163', '002170', '002580', '002771', '005118', '005312']
-2025-09-18 00:32:24,826 - INFO - 开始获取 10 个基金的数据...
-2025-09-18 00:32:24,826 - INFO - 处理第 1/10 个基金: 001407
-2025-09-18 00:32:24,826 - INFO - 正在获取基金 001407 的净值数据...
-2025-09-18 00:32:24,827 - INFO - ====== WebDriver manager ======
-2025-09-18 00:32:24,891 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:32:24,935 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:32:24,968 - INFO - There is no [linux64] chromedriver "140.0.7339.82" for browser google-chrome "140.0.7339" in cache
-2025-09-18 00:32:24,969 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:32:25,072 - INFO - WebDriver version 140.0.7339.82 selected
-2025-09-18 00:32:25,077 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.82/linux64/chromedriver-linux64.zip
-2025-09-18 00:32:25,078 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.82/linux64/chromedriver-linux64.zip
-2025-09-18 00:32:25,121 - INFO - Driver downloading response is 200
-2025-09-18 00:32:25,197 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:32:25,342 - INFO - Driver has been saved in cache [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82]
-2025-09-18 00:32:30,897 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_001407.html
-2025-09-18 00:32:30,914 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:32:30,922 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:32:30,947 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:32:41,184 - INFO - 基金 001407 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:43:21,578 - INFO - 提取到 10 个基金（测试限制前10个）: ['001407', '001724', '002052', '002112', '002163', '002170', '002580', '002771', '005118', '005312']
+2025-09-18 00:43:21,578 - INFO - 开始获取 10 个基金的数据...
+2025-09-18 00:43:21,578 - INFO - 处理第 1/10 个基金: 001407
+2025-09-18 00:43:21,579 - INFO - 正在获取基金 001407 的净值数据...
+2025-09-18 00:43:21,579 - INFO - ====== WebDriver manager ======
+2025-09-18 00:43:21,644 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:43:21,689 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:43:21,725 - INFO - There is no [linux64] chromedriver "140.0.7339.185" for browser google-chrome "140.0.7339" in cache
+2025-09-18 00:43:21,725 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:43:21,847 - INFO - WebDriver version 140.0.7339.185 selected
+2025-09-18 00:43:21,851 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.185/linux64/chromedriver-linux64.zip
+2025-09-18 00:43:21,852 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.185/linux64/chromedriver-linux64.zip
+2025-09-18 00:43:21,901 - INFO - Driver downloading response is 200
+2025-09-18 00:43:22,010 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:43:22,159 - INFO - Driver has been saved in cache [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185]
+2025-09-18 00:43:28,663 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_001407.html
+2025-09-18 00:43:28,680 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:43:28,688 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:43:28,712 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:43:38,932 - INFO - 基金 001407 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x561cecc9a94a <unknown>
-#1 0x561cec70f8a0 <unknown>
-#2 0x561cec761540 <unknown>
-#3 0x561cec761731 <unknown>
-#4 0x561cec7af824 <unknown>
-#5 0x561cec78705d <unknown>
-#6 0x561cec7acc23 <unknown>
-#7 0x561cec786e03 <unknown>
-#8 0x561cec753968 <unknown>
-#9 0x561cec7545e1 <unknown>
-#10 0x561cecc5e548 <unknown>
-#11 0x561cecc62272 <unknown>
-#12 0x561cecc45313 <unknown>
-#13 0x561cecc62dc5 <unknown>
-#14 0x561cecc2a49f <unknown>
-#15 0x561cecc87158 <unknown>
-#16 0x561cecc87332 <unknown>
-#17 0x561cecc99a53 <unknown>
-#18 0x7f16ef49caa4 <unknown>
-#19 0x7f16ef529c3c <unknown>
+#0 0x5637b8662cba <unknown>
+#1 0x5637b80d78e0 <unknown>
+#2 0x5637b8129580 <unknown>
+#3 0x5637b8129771 <unknown>
+#4 0x5637b8177864 <unknown>
+#5 0x5637b814f09d <unknown>
+#6 0x5637b8174c63 <unknown>
+#7 0x5637b814ee43 <unknown>
+#8 0x5637b811b9a8 <unknown>
+#9 0x5637b811c621 <unknown>
+#10 0x5637b86268b8 <unknown>
+#11 0x5637b862a5e2 <unknown>
+#12 0x5637b860d683 <unknown>
+#13 0x5637b862b135 <unknown>
+#14 0x5637b85f280f <unknown>
+#15 0x5637b864f4c8 <unknown>
+#16 0x5637b864f6a2 <unknown>
+#17 0x5637b8661dc3 <unknown>
+#18 0x7f298e29caa4 <unknown>
+#19 0x7f298e329c3c <unknown>
 
-2025-09-18 00:32:41,186 - WARNING - 基金 001407 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:32:41,186 - INFO - 成功解析基金 001407 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 3.9640
-2025-09-18 00:32:41,256 - INFO - 成功计算基金 001407 的技术指标: 净值=3.9640, RSI=67.25, MA50比率=1.11
-2025-09-18 00:32:42,292 - INFO - 处理第 2/10 个基金: 001724
-2025-09-18 00:32:42,293 - INFO - 正在获取基金 001724 的净值数据...
-2025-09-18 00:32:42,293 - INFO - ====== WebDriver manager ======
-2025-09-18 00:32:42,358 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:32:42,399 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:32:42,433 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
-2025-09-18 00:32:45,896 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_001724.html
-2025-09-18 00:32:45,914 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:32:45,922 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:32:45,933 - ERROR - 基金 001724 翻页失败: No tables found matching regex '.+'
-2025-09-18 00:32:45,933 - ERROR - Selenium 抓取基金 001724 失败: 未获取到任何有效数据
-2025-09-18 00:32:46,060 - INFO - 错误截图和页面已保存到 error_screenshot_001724.png 和 error_page_001724.html
-2025-09-18 00:32:46,122 - ERROR - 处理基金 001724 时发生异常: 未获取到任何有效数据
-2025-09-18 00:32:46,122 - INFO - 处理第 3/10 个基金: 002052
-2025-09-18 00:32:46,122 - INFO - 正在获取基金 002052 的净值数据...
-2025-09-18 00:32:46,122 - INFO - ====== WebDriver manager ======
-2025-09-18 00:32:46,188 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:32:46,236 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:32:46,268 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
-2025-09-18 00:32:49,683 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002052.html
-2025-09-18 00:32:49,701 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:32:49,709 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:32:49,725 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:32:59,956 - INFO - 基金 002052 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:43:38,933 - WARNING - 基金 001407 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:43:38,934 - INFO - 成功解析基金 001407 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 3.9640
+2025-09-18 00:43:39,003 - INFO - 成功计算基金 001407 的技术指标: 净值=3.9640, RSI=67.25, MA50比率=1.11
+2025-09-18 00:43:41,529 - INFO - 处理第 2/10 个基金: 001724
+2025-09-18 00:43:41,530 - INFO - 正在获取基金 001724 的净值数据...
+2025-09-18 00:43:41,530 - INFO - ====== WebDriver manager ======
+2025-09-18 00:43:41,595 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:43:41,637 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:43:41,671 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:43:45,284 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_001724.html
+2025-09-18 00:43:45,302 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:43:45,311 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:43:45,327 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:43:55,543 - INFO - 基金 001724 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x555cf375694a <unknown>
-#1 0x555cf31cb8a0 <unknown>
-#2 0x555cf321d540 <unknown>
-#3 0x555cf321d731 <unknown>
-#4 0x555cf326b824 <unknown>
-#5 0x555cf324305d <unknown>
-#6 0x555cf3268c23 <unknown>
-#7 0x555cf3242e03 <unknown>
-#8 0x555cf320f968 <unknown>
-#9 0x555cf32105e1 <unknown>
-#10 0x555cf371a548 <unknown>
-#11 0x555cf371e272 <unknown>
-#12 0x555cf3701313 <unknown>
-#13 0x555cf371edc5 <unknown>
-#14 0x555cf36e649f <unknown>
-#15 0x555cf3743158 <unknown>
-#16 0x555cf3743332 <unknown>
-#17 0x555cf3755a53 <unknown>
-#18 0x7fa1d1c9caa4 <unknown>
-#19 0x7fa1d1d29c3c <unknown>
+#0 0x5641c7322cba <unknown>
+#1 0x5641c6d978e0 <unknown>
+#2 0x5641c6de9580 <unknown>
+#3 0x5641c6de9771 <unknown>
+#4 0x5641c6e37864 <unknown>
+#5 0x5641c6e0f09d <unknown>
+#6 0x5641c6e34c63 <unknown>
+#7 0x5641c6e0ee43 <unknown>
+#8 0x5641c6ddb9a8 <unknown>
+#9 0x5641c6ddc621 <unknown>
+#10 0x5641c72e68b8 <unknown>
+#11 0x5641c72ea5e2 <unknown>
+#12 0x5641c72cd683 <unknown>
+#13 0x5641c72eb135 <unknown>
+#14 0x5641c72b280f <unknown>
+#15 0x5641c730f4c8 <unknown>
+#16 0x5641c730f6a2 <unknown>
+#17 0x5641c7321dc3 <unknown>
+#18 0x7f3a9969caa4 <unknown>
+#19 0x7f3a99729c3c <unknown>
 
-2025-09-18 00:32:59,958 - WARNING - 基金 002052 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:32:59,958 - INFO - 成功解析基金 002052 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 1.8700
-2025-09-18 00:33:00,028 - INFO - 成功计算基金 002052 的技术指标: 净值=1.8700, RSI=54.44, MA50比率=1.07
-2025-09-18 00:33:01,384 - INFO - 处理第 4/10 个基金: 002112
-2025-09-18 00:33:01,385 - INFO - 正在获取基金 002112 的净值数据...
-2025-09-18 00:33:01,385 - INFO - ====== WebDriver manager ======
-2025-09-18 00:33:01,451 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:01,485 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:01,530 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
-2025-09-18 00:33:04,808 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002112.html
-2025-09-18 00:33:04,825 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:33:04,833 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:33:04,848 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:33:15,078 - INFO - 基金 002112 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:43:55,545 - WARNING - 基金 001724 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:43:55,545 - INFO - 成功解析基金 001724 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 2.2480
+2025-09-18 00:43:55,614 - INFO - 成功计算基金 001724 的技术指标: 净值=2.2480, RSI=51.47, MA50比率=1.00
+2025-09-18 00:43:57,076 - INFO - 处理第 3/10 个基金: 002052
+2025-09-18 00:43:57,076 - INFO - 正在获取基金 002052 的净值数据...
+2025-09-18 00:43:57,077 - INFO - ====== WebDriver manager ======
+2025-09-18 00:43:57,142 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:43:57,211 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:43:57,244 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:44:00,806 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002052.html
+2025-09-18 00:44:00,823 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:44:00,831 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:44:00,849 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:44:11,075 - INFO - 基金 002052 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x5574a6fb094a <unknown>
-#1 0x5574a6a258a0 <unknown>
-#2 0x5574a6a77540 <unknown>
-#3 0x5574a6a77731 <unknown>
-#4 0x5574a6ac5824 <unknown>
-#5 0x5574a6a9d05d <unknown>
-#6 0x5574a6ac2c23 <unknown>
-#7 0x5574a6a9ce03 <unknown>
-#8 0x5574a6a69968 <unknown>
-#9 0x5574a6a6a5e1 <unknown>
-#10 0x5574a6f74548 <unknown>
-#11 0x5574a6f78272 <unknown>
-#12 0x5574a6f5b313 <unknown>
-#13 0x5574a6f78dc5 <unknown>
-#14 0x5574a6f4049f <unknown>
-#15 0x5574a6f9d158 <unknown>
-#16 0x5574a6f9d332 <unknown>
-#17 0x5574a6fafa53 <unknown>
-#18 0x7f763649caa4 <unknown>
-#19 0x7f7636529c3c <unknown>
+#0 0x559e89f4fcba <unknown>
+#1 0x559e899c48e0 <unknown>
+#2 0x559e89a16580 <unknown>
+#3 0x559e89a16771 <unknown>
+#4 0x559e89a64864 <unknown>
+#5 0x559e89a3c09d <unknown>
+#6 0x559e89a61c63 <unknown>
+#7 0x559e89a3be43 <unknown>
+#8 0x559e89a089a8 <unknown>
+#9 0x559e89a09621 <unknown>
+#10 0x559e89f138b8 <unknown>
+#11 0x559e89f175e2 <unknown>
+#12 0x559e89efa683 <unknown>
+#13 0x559e89f18135 <unknown>
+#14 0x559e89edf80f <unknown>
+#15 0x559e89f3c4c8 <unknown>
+#16 0x559e89f3c6a2 <unknown>
+#17 0x559e89f4edc3 <unknown>
+#18 0x7f4b08e9caa4 <unknown>
+#19 0x7f4b08f29c3c <unknown>
 
-2025-09-18 00:33:15,080 - WARNING - 基金 002112 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:33:15,080 - INFO - 成功解析基金 002112 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 3.2759
-2025-09-18 00:33:15,149 - INFO - 成功计算基金 002112 的技术指标: 净值=3.2759, RSI=55.01, MA50比率=1.10
-2025-09-18 00:33:16,798 - INFO - 处理第 5/10 个基金: 002163
-2025-09-18 00:33:16,798 - INFO - 正在获取基金 002163 的净值数据...
-2025-09-18 00:33:16,798 - INFO - ====== WebDriver manager ======
-2025-09-18 00:33:16,864 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:16,924 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:16,961 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
-2025-09-18 00:33:20,199 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002163.html
-2025-09-18 00:33:20,215 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:33:20,223 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:33:20,239 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:33:30,468 - INFO - 基金 002163 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:44:11,076 - WARNING - 基金 002052 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:44:11,076 - INFO - 成功解析基金 002052 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 1.8700
+2025-09-18 00:44:11,148 - INFO - 成功计算基金 002052 的技术指标: 净值=1.8700, RSI=54.44, MA50比率=1.07
+2025-09-18 00:44:12,397 - INFO - 处理第 4/10 个基金: 002112
+2025-09-18 00:44:12,397 - INFO - 正在获取基金 002112 的净值数据...
+2025-09-18 00:44:12,397 - INFO - ====== WebDriver manager ======
+2025-09-18 00:44:12,463 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:44:12,496 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:44:12,532 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:44:16,187 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002112.html
+2025-09-18 00:44:16,204 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:44:16,211 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:44:16,227 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:44:26,458 - INFO - 基金 002112 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x55b7b6af594a <unknown>
-#1 0x55b7b656a8a0 <unknown>
-#2 0x55b7b65bc540 <unknown>
-#3 0x55b7b65bc731 <unknown>
-#4 0x55b7b660a824 <unknown>
-#5 0x55b7b65e205d <unknown>
-#6 0x55b7b6607c23 <unknown>
-#7 0x55b7b65e1e03 <unknown>
-#8 0x55b7b65ae968 <unknown>
-#9 0x55b7b65af5e1 <unknown>
-#10 0x55b7b6ab9548 <unknown>
-#11 0x55b7b6abd272 <unknown>
-#12 0x55b7b6aa0313 <unknown>
-#13 0x55b7b6abddc5 <unknown>
-#14 0x55b7b6a8549f <unknown>
-#15 0x55b7b6ae2158 <unknown>
-#16 0x55b7b6ae2332 <unknown>
-#17 0x55b7b6af4a53 <unknown>
-#18 0x7f193e49caa4 <unknown>
-#19 0x7f193e529c3c <unknown>
+#0 0x55f6eb82dcba <unknown>
+#1 0x55f6eb2a28e0 <unknown>
+#2 0x55f6eb2f4580 <unknown>
+#3 0x55f6eb2f4771 <unknown>
+#4 0x55f6eb342864 <unknown>
+#5 0x55f6eb31a09d <unknown>
+#6 0x55f6eb33fc63 <unknown>
+#7 0x55f6eb319e43 <unknown>
+#8 0x55f6eb2e69a8 <unknown>
+#9 0x55f6eb2e7621 <unknown>
+#10 0x55f6eb7f18b8 <unknown>
+#11 0x55f6eb7f55e2 <unknown>
+#12 0x55f6eb7d8683 <unknown>
+#13 0x55f6eb7f6135 <unknown>
+#14 0x55f6eb7bd80f <unknown>
+#15 0x55f6eb81a4c8 <unknown>
+#16 0x55f6eb81a6a2 <unknown>
+#17 0x55f6eb82cdc3 <unknown>
+#18 0x7f0c1589caa4 <unknown>
+#19 0x7f0c15929c3c <unknown>
 
-2025-09-18 00:33:30,469 - WARNING - 基金 002163 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:33:30,469 - INFO - 成功解析基金 002163 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 1.3490
-2025-09-18 00:33:30,539 - INFO - 成功计算基金 002163 的技术指标: 净值=1.3490, RSI=52.46, MA50比率=1.06
-2025-09-18 00:33:33,093 - INFO - 处理第 6/10 个基金: 002170
-2025-09-18 00:33:33,094 - INFO - 正在获取基金 002170 的净值数据...
-2025-09-18 00:33:33,094 - INFO - ====== WebDriver manager ======
-2025-09-18 00:33:33,160 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:33,197 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:33,230 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.82/chromedriver-linux64/chromedriver] found in cache
-2025-09-18 00:33:37,575 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002170.html
-2025-09-18 00:33:37,592 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:33:37,601 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:33:37,616 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:33:47,854 - INFO - 基金 002170 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:44:26,460 - WARNING - 基金 002112 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:44:26,460 - INFO - 成功解析基金 002112 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 3.2759
+2025-09-18 00:44:26,529 - INFO - 成功计算基金 002112 的技术指标: 净值=3.2759, RSI=55.01, MA50比率=1.10
+2025-09-18 00:44:28,315 - INFO - 处理第 5/10 个基金: 002163
+2025-09-18 00:44:28,315 - INFO - 正在获取基金 002163 的净值数据...
+2025-09-18 00:44:28,316 - INFO - ====== WebDriver manager ======
+2025-09-18 00:44:28,381 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:44:28,417 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:44:28,452 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:44:33,242 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002163.html
+2025-09-18 00:44:33,259 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:44:33,267 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:44:33,282 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:44:43,512 - INFO - 基金 002163 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x55cba661e94a <unknown>
-#1 0x55cba60938a0 <unknown>
-#2 0x55cba60e5540 <unknown>
-#3 0x55cba60e5731 <unknown>
-#4 0x55cba6133824 <unknown>
-#5 0x55cba610b05d <unknown>
-#6 0x55cba6130c23 <unknown>
-#7 0x55cba610ae03 <unknown>
-#8 0x55cba60d7968 <unknown>
-#9 0x55cba60d85e1 <unknown>
-#10 0x55cba65e2548 <unknown>
-#11 0x55cba65e6272 <unknown>
-#12 0x55cba65c9313 <unknown>
-#13 0x55cba65e6dc5 <unknown>
-#14 0x55cba65ae49f <unknown>
-#15 0x55cba660b158 <unknown>
-#16 0x55cba660b332 <unknown>
-#17 0x55cba661da53 <unknown>
-#18 0x7f412b49caa4 <unknown>
-#19 0x7f412b529c3c <unknown>
+#0 0x5648eca6dcba <unknown>
+#1 0x5648ec4e28e0 <unknown>
+#2 0x5648ec534580 <unknown>
+#3 0x5648ec534771 <unknown>
+#4 0x5648ec582864 <unknown>
+#5 0x5648ec55a09d <unknown>
+#6 0x5648ec57fc63 <unknown>
+#7 0x5648ec559e43 <unknown>
+#8 0x5648ec5269a8 <unknown>
+#9 0x5648ec527621 <unknown>
+#10 0x5648eca318b8 <unknown>
+#11 0x5648eca355e2 <unknown>
+#12 0x5648eca18683 <unknown>
+#13 0x5648eca36135 <unknown>
+#14 0x5648ec9fd80f <unknown>
+#15 0x5648eca5a4c8 <unknown>
+#16 0x5648eca5a6a2 <unknown>
+#17 0x5648eca6cdc3 <unknown>
+#18 0x7f0f3269caa4 <unknown>
+#19 0x7f0f32729c3c <unknown>
 
-2025-09-18 00:33:47,855 - WARNING - 基金 002170 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:33:47,856 - INFO - 成功解析基金 002170 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 5.6575
-2025-09-18 00:33:47,925 - INFO - 成功计算基金 002170 的技术指标: 净值=5.6575, RSI=59.97, MA50比率=1.08
-2025-09-18 00:33:50,053 - INFO - 处理第 7/10 个基金: 002580
-2025-09-18 00:33:50,053 - INFO - 正在获取基金 002580 的净值数据...
-2025-09-18 00:33:50,053 - INFO - ====== WebDriver manager ======
-2025-09-18 00:33:50,120 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:50,153 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:50,187 - INFO - There is no [linux64] chromedriver "140.0.7339.185" for browser google-chrome "140.0.7339" in cache
-2025-09-18 00:33:50,187 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:50,289 - INFO - WebDriver version 140.0.7339.185 selected
-2025-09-18 00:33:50,294 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.185/linux64/chromedriver-linux64.zip
-2025-09-18 00:33:50,295 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/140.0.7339.185/linux64/chromedriver-linux64.zip
-2025-09-18 00:33:50,347 - INFO - Driver downloading response is 200
-2025-09-18 00:33:50,412 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:33:50,562 - INFO - Driver has been saved in cache [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185]
-2025-09-18 00:33:53,726 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002580.html
-2025-09-18 00:33:53,743 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:33:53,751 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:33:53,767 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:34:03,999 - INFO - 基金 002580 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:44:43,513 - WARNING - 基金 002163 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:44:43,513 - INFO - 成功解析基金 002163 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 1.3490
+2025-09-18 00:44:43,583 - INFO - 成功计算基金 002163 的技术指标: 净值=1.3490, RSI=52.46, MA50比率=1.06
+2025-09-18 00:44:45,355 - INFO - 处理第 6/10 个基金: 002170
+2025-09-18 00:44:45,355 - INFO - 正在获取基金 002170 的净值数据...
+2025-09-18 00:44:45,356 - INFO - ====== WebDriver manager ======
+2025-09-18 00:44:45,421 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:44:45,457 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:44:45,504 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:44:49,423 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002170.html
+2025-09-18 00:44:49,441 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:44:49,449 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:44:49,467 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:44:59,688 - INFO - 基金 002170 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x5573e01c7cba <unknown>
-#1 0x5573dfc3c8e0 <unknown>
-#2 0x5573dfc8e580 <unknown>
-#3 0x5573dfc8e771 <unknown>
-#4 0x5573dfcdc864 <unknown>
-#5 0x5573dfcb409d <unknown>
-#6 0x5573dfcd9c63 <unknown>
-#7 0x5573dfcb3e43 <unknown>
-#8 0x5573dfc809a8 <unknown>
-#9 0x5573dfc81621 <unknown>
-#10 0x5573e018b8b8 <unknown>
-#11 0x5573e018f5e2 <unknown>
-#12 0x5573e0172683 <unknown>
-#13 0x5573e0190135 <unknown>
-#14 0x5573e015780f <unknown>
-#15 0x5573e01b44c8 <unknown>
-#16 0x5573e01b46a2 <unknown>
-#17 0x5573e01c6dc3 <unknown>
-#18 0x7f8e2ce9caa4 <unknown>
-#19 0x7f8e2cf29c3c <unknown>
+#0 0x557f7caabcba <unknown>
+#1 0x557f7c5208e0 <unknown>
+#2 0x557f7c572580 <unknown>
+#3 0x557f7c572771 <unknown>
+#4 0x557f7c5c0864 <unknown>
+#5 0x557f7c59809d <unknown>
+#6 0x557f7c5bdc63 <unknown>
+#7 0x557f7c597e43 <unknown>
+#8 0x557f7c5649a8 <unknown>
+#9 0x557f7c565621 <unknown>
+#10 0x557f7ca6f8b8 <unknown>
+#11 0x557f7ca735e2 <unknown>
+#12 0x557f7ca56683 <unknown>
+#13 0x557f7ca74135 <unknown>
+#14 0x557f7ca3b80f <unknown>
+#15 0x557f7ca984c8 <unknown>
+#16 0x557f7ca986a2 <unknown>
+#17 0x557f7caaadc3 <unknown>
+#18 0x7fc00369caa4 <unknown>
+#19 0x7fc003729c3c <unknown>
 
-2025-09-18 00:34:04,001 - WARNING - 基金 002580 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:34:04,001 - INFO - 成功解析基金 002580 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 1.4370
-2025-09-18 00:34:04,072 - INFO - 成功计算基金 002580 的技术指标: 净值=1.4370, RSI=47.00, MA50比率=1.04
-2025-09-18 00:34:05,738 - INFO - 处理第 8/10 个基金: 002771
-2025-09-18 00:34:05,738 - INFO - 正在获取基金 002771 的净值数据...
-2025-09-18 00:34:05,738 - INFO - ====== WebDriver manager ======
-2025-09-18 00:34:05,804 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:34:05,838 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:34:05,874 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
-2025-09-18 00:34:08,950 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002771.html
-2025-09-18 00:34:08,969 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:34:08,978 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:34:08,996 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:34:19,234 - INFO - 基金 002771 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:44:59,690 - WARNING - 基金 002170 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:44:59,690 - INFO - 成功解析基金 002170 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 5.6575
+2025-09-18 00:44:59,759 - INFO - 成功计算基金 002170 的技术指标: 净值=5.6575, RSI=59.97, MA50比率=1.08
+2025-09-18 00:45:02,613 - INFO - 处理第 7/10 个基金: 002580
+2025-09-18 00:45:02,613 - INFO - 正在获取基金 002580 的净值数据...
+2025-09-18 00:45:02,613 - INFO - ====== WebDriver manager ======
+2025-09-18 00:45:02,680 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:45:02,713 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:45:02,752 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:45:06,738 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002580.html
+2025-09-18 00:45:06,755 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:45:06,762 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:45:06,778 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:45:16,993 - INFO - 基金 002580 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x55997158ecba <unknown>
-#1 0x5599710038e0 <unknown>
-#2 0x559971055580 <unknown>
-#3 0x559971055771 <unknown>
-#4 0x5599710a3864 <unknown>
-#5 0x55997107b09d <unknown>
-#6 0x5599710a0c63 <unknown>
-#7 0x55997107ae43 <unknown>
-#8 0x5599710479a8 <unknown>
-#9 0x559971048621 <unknown>
-#10 0x5599715528b8 <unknown>
-#11 0x5599715565e2 <unknown>
-#12 0x559971539683 <unknown>
-#13 0x559971557135 <unknown>
-#14 0x55997151e80f <unknown>
-#15 0x55997157b4c8 <unknown>
-#16 0x55997157b6a2 <unknown>
-#17 0x55997158ddc3 <unknown>
-#18 0x7f3ba449caa4 <unknown>
-#19 0x7f3ba4529c3c <unknown>
+#0 0x561bfc502cba <unknown>
+#1 0x561bfbf778e0 <unknown>
+#2 0x561bfbfc9580 <unknown>
+#3 0x561bfbfc9771 <unknown>
+#4 0x561bfc017864 <unknown>
+#5 0x561bfbfef09d <unknown>
+#6 0x561bfc014c63 <unknown>
+#7 0x561bfbfeee43 <unknown>
+#8 0x561bfbfbb9a8 <unknown>
+#9 0x561bfbfbc621 <unknown>
+#10 0x561bfc4c68b8 <unknown>
+#11 0x561bfc4ca5e2 <unknown>
+#12 0x561bfc4ad683 <unknown>
+#13 0x561bfc4cb135 <unknown>
+#14 0x561bfc49280f <unknown>
+#15 0x561bfc4ef4c8 <unknown>
+#16 0x561bfc4ef6a2 <unknown>
+#17 0x561bfc501dc3 <unknown>
+#18 0x7fb71109caa4 <unknown>
+#19 0x7fb711129c3c <unknown>
 
-2025-09-18 00:34:19,236 - WARNING - 基金 002771 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:34:19,236 - INFO - 成功解析基金 002771 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 4.5106
-2025-09-18 00:34:19,305 - INFO - 成功计算基金 002771 的技术指标: 净值=4.5106, RSI=56.64, MA50比率=1.07
-2025-09-18 00:34:20,982 - INFO - 处理第 9/10 个基金: 005118
-2025-09-18 00:34:20,983 - INFO - 正在获取基金 005118 的净值数据...
-2025-09-18 00:34:20,983 - INFO - ====== WebDriver manager ======
-2025-09-18 00:34:21,049 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:34:21,087 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:34:21,122 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
-2025-09-18 00:34:24,175 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_005118.html
-2025-09-18 00:34:24,192 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:34:24,200 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:34:24,216 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:34:34,445 - INFO - 基金 005118 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:45:16,995 - WARNING - 基金 002580 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:45:16,995 - INFO - 成功解析基金 002580 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 1.4370
+2025-09-18 00:45:17,064 - INFO - 成功计算基金 002580 的技术指标: 净值=1.4370, RSI=47.00, MA50比率=1.04
+2025-09-18 00:45:18,627 - INFO - 处理第 8/10 个基金: 002771
+2025-09-18 00:45:18,627 - INFO - 正在获取基金 002771 的净值数据...
+2025-09-18 00:45:18,628 - INFO - ====== WebDriver manager ======
+2025-09-18 00:45:18,693 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:45:18,729 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:45:18,762 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:45:22,283 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_002771.html
+2025-09-18 00:45:22,301 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:45:22,309 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:45:22,325 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:45:32,543 - INFO - 基金 002771 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x55ba25e33cba <unknown>
-#1 0x55ba258a88e0 <unknown>
-#2 0x55ba258fa580 <unknown>
-#3 0x55ba258fa771 <unknown>
-#4 0x55ba25948864 <unknown>
-#5 0x55ba2592009d <unknown>
-#6 0x55ba25945c63 <unknown>
-#7 0x55ba2591fe43 <unknown>
-#8 0x55ba258ec9a8 <unknown>
-#9 0x55ba258ed621 <unknown>
-#10 0x55ba25df78b8 <unknown>
-#11 0x55ba25dfb5e2 <unknown>
-#12 0x55ba25dde683 <unknown>
-#13 0x55ba25dfc135 <unknown>
-#14 0x55ba25dc380f <unknown>
-#15 0x55ba25e204c8 <unknown>
-#16 0x55ba25e206a2 <unknown>
-#17 0x55ba25e32dc3 <unknown>
-#18 0x7ff76909caa4 <unknown>
-#19 0x7ff769129c3c <unknown>
+#0 0x55d1f9bdecba <unknown>
+#1 0x55d1f96538e0 <unknown>
+#2 0x55d1f96a5580 <unknown>
+#3 0x55d1f96a5771 <unknown>
+#4 0x55d1f96f3864 <unknown>
+#5 0x55d1f96cb09d <unknown>
+#6 0x55d1f96f0c63 <unknown>
+#7 0x55d1f96cae43 <unknown>
+#8 0x55d1f96979a8 <unknown>
+#9 0x55d1f9698621 <unknown>
+#10 0x55d1f9ba28b8 <unknown>
+#11 0x55d1f9ba65e2 <unknown>
+#12 0x55d1f9b89683 <unknown>
+#13 0x55d1f9ba7135 <unknown>
+#14 0x55d1f9b6e80f <unknown>
+#15 0x55d1f9bcb4c8 <unknown>
+#16 0x55d1f9bcb6a2 <unknown>
+#17 0x55d1f9bdddc3 <unknown>
+#18 0x7f00b389caa4 <unknown>
+#19 0x7f00b3929c3c <unknown>
 
-2025-09-18 00:34:34,447 - WARNING - 基金 005118 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:34:34,447 - INFO - 成功解析基金 005118 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 1.6297
-2025-09-18 00:34:34,516 - INFO - 成功计算基金 005118 的技术指标: 净值=1.6297, RSI=48.58, MA50比率=0.98
-2025-09-18 00:34:35,591 - INFO - 处理第 10/10 个基金: 005312
-2025-09-18 00:34:35,591 - INFO - 正在获取基金 005312 的净值数据...
-2025-09-18 00:34:35,591 - INFO - ====== WebDriver manager ======
-2025-09-18 00:34:35,656 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:34:35,690 - INFO - Get LATEST chromedriver version for google-chrome
-2025-09-18 00:34:35,726 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
-2025-09-18 00:34:39,503 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_005312.html
-2025-09-18 00:34:39,521 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
-2025-09-18 00:34:39,530 - INFO - 第 1 页: 分页导航容器加载完成
-2025-09-18 00:34:39,546 - INFO - 第 1 页: 解析成功，获取 20 行数据
-2025-09-18 00:34:49,783 - INFO - 基金 005312 等待下一页按钮超时，可能已到达最后一页: Message: 
+2025-09-18 00:45:32,544 - WARNING - 基金 002771 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:45:32,544 - INFO - 成功解析基金 002771 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 4.5106
+2025-09-18 00:45:32,614 - INFO - 成功计算基金 002771 的技术指标: 净值=4.5106, RSI=56.64, MA50比率=1.07
+2025-09-18 00:45:35,373 - INFO - 处理第 9/10 个基金: 005118
+2025-09-18 00:45:35,374 - INFO - 正在获取基金 005118 的净值数据...
+2025-09-18 00:45:35,374 - INFO - ====== WebDriver manager ======
+2025-09-18 00:45:35,440 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:45:35,479 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:45:35,512 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:45:40,164 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_005118.html
+2025-09-18 00:45:40,181 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:45:40,189 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:45:40,207 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:45:50,425 - INFO - 基金 005118 等待下一页按钮超时，可能已到达最后一页: Message: 
 Stacktrace:
-#0 0x55bbc2596cba <unknown>
-#1 0x55bbc200b8e0 <unknown>
-#2 0x55bbc205d580 <unknown>
-#3 0x55bbc205d771 <unknown>
-#4 0x55bbc20ab864 <unknown>
-#5 0x55bbc208309d <unknown>
-#6 0x55bbc20a8c63 <unknown>
-#7 0x55bbc2082e43 <unknown>
-#8 0x55bbc204f9a8 <unknown>
-#9 0x55bbc2050621 <unknown>
-#10 0x55bbc255a8b8 <unknown>
-#11 0x55bbc255e5e2 <unknown>
-#12 0x55bbc2541683 <unknown>
-#13 0x55bbc255f135 <unknown>
-#14 0x55bbc252680f <unknown>
-#15 0x55bbc25834c8 <unknown>
-#16 0x55bbc25836a2 <unknown>
-#17 0x55bbc2595dc3 <unknown>
-#18 0x7faffc29caa4 <unknown>
-#19 0x7faffc329c3c <unknown>
+#0 0x561ddf200cba <unknown>
+#1 0x561ddec758e0 <unknown>
+#2 0x561ddecc7580 <unknown>
+#3 0x561ddecc7771 <unknown>
+#4 0x561dded15864 <unknown>
+#5 0x561ddeced09d <unknown>
+#6 0x561dded12c63 <unknown>
+#7 0x561ddecece43 <unknown>
+#8 0x561ddecb99a8 <unknown>
+#9 0x561ddecba621 <unknown>
+#10 0x561ddf1c48b8 <unknown>
+#11 0x561ddf1c85e2 <unknown>
+#12 0x561ddf1ab683 <unknown>
+#13 0x561ddf1c9135 <unknown>
+#14 0x561ddf19080f <unknown>
+#15 0x561ddf1ed4c8 <unknown>
+#16 0x561ddf1ed6a2 <unknown>
+#17 0x561ddf1ffdc3 <unknown>
+#18 0x7fb4be49caa4 <unknown>
+#19 0x7fb4be529c3c <unknown>
 
-2025-09-18 00:34:49,784 - WARNING - 基金 005312 数据量不足，仅获取 20 行，预期 100 行
-2025-09-18 00:34:49,785 - INFO - 成功解析基金 005312 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 2.1157
-2025-09-18 00:34:49,854 - INFO - 成功计算基金 005312 的技术指标: 净值=2.1157, RSI=50.04, MA50比率=1.03
-2025-09-18 00:34:51,753 - INFO - 正在生成市场监控报告...
-2025-09-18 00:34:51,754 - INFO - 报告生成完成: market_monitor_report.md
-2025-09-18 00:34:51,754 - INFO - market_monitor_report.md 内容: # 市场情绪与技术指标监控报告
+2025-09-18 00:45:50,426 - WARNING - 基金 005118 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:45:50,427 - INFO - 成功解析基金 005118 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 1.6297
+2025-09-18 00:45:50,496 - INFO - 成功计算基金 005118 的技术指标: 净值=1.6297, RSI=48.58, MA50比率=0.98
+2025-09-18 00:45:52,302 - INFO - 处理第 10/10 个基金: 005312
+2025-09-18 00:45:52,303 - INFO - 正在获取基金 005312 的净值数据...
+2025-09-18 00:45:52,303 - INFO - ====== WebDriver manager ======
+2025-09-18 00:45:52,383 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:45:52,418 - INFO - Get LATEST chromedriver version for google-chrome
+2025-09-18 00:45:52,455 - INFO - Driver [/home/runner/.wdm/drivers/chromedriver/linux64/140.0.7339.185/chromedriver-linux64/chromedriver] found in cache
+2025-09-18 00:45:56,074 - INFO - 访问URL: http://fundf10.eastmoney.com/jjjz_005312.html
+2025-09-18 00:45:56,092 - INFO - 第 1 页: 历史净值表格容器加载完成并可见
+2025-09-18 00:45:56,101 - INFO - 第 1 页: 分页导航容器加载完成
+2025-09-18 00:45:56,117 - INFO - 第 1 页: 解析成功，获取 20 行数据
+2025-09-18 00:46:06,335 - INFO - 基金 005312 等待下一页按钮超时，可能已到达最后一页: Message: 
+Stacktrace:
+#0 0x557afc932cba <unknown>
+#1 0x557afc3a78e0 <unknown>
+#2 0x557afc3f9580 <unknown>
+#3 0x557afc3f9771 <unknown>
+#4 0x557afc447864 <unknown>
+#5 0x557afc41f09d <unknown>
+#6 0x557afc444c63 <unknown>
+#7 0x557afc41ee43 <unknown>
+#8 0x557afc3eb9a8 <unknown>
+#9 0x557afc3ec621 <unknown>
+#10 0x557afc8f68b8 <unknown>
+#11 0x557afc8fa5e2 <unknown>
+#12 0x557afc8dd683 <unknown>
+#13 0x557afc8fb135 <unknown>
+#14 0x557afc8c280f <unknown>
+#15 0x557afc91f4c8 <unknown>
+#16 0x557afc91f6a2 <unknown>
+#17 0x557afc931dc3 <unknown>
+#18 0x7f9c90c9caa4 <unknown>
+#19 0x7f9c90d29c3c <unknown>
 
-生成日期: 2025-09-18 00:34:51
+2025-09-18 00:46:06,336 - WARNING - 基金 005312 数据量不足，仅获取 20 行，预期 100 行
+2025-09-18 00:46:06,337 - INFO - 成功解析基金 005312 的数据，共获取 1 页，总行数: 20, 最新日期: 2025-09-17, 最新净值: 2.1157
+2025-09-18 00:46:06,406 - INFO - 成功计算基金 005312 的技术指标: 净值=2.1157, RSI=50.04, MA50比率=1.03
+2025-09-18 00:46:07,497 - INFO - 正在生成市场监控报告...
+2025-09-18 00:46:07,498 - INFO - 报告生成完成: market_monitor_report.md
+2025-09-18 00:46:07,498 - INFO - market_monitor_report.md 内容: # 市场情绪与技术指标监控报告
+
+生成日期: 2025-09-18 00:46:07
 
 ## 推荐基金技术指标 (处理基金数: 10)
 | 基金代码 | 最新净值 | RSI | 净值/MA50 | 投资建议 |
 |----------|----------|-----|-----------|----------|
 | 001407 | 3.9640 | 67.25 | 1.11 | 可分批买入 |
-| 001724 | 数据获取失败 | - | - | 观察 |
+| 001724 | 2.2480 | 51.47 | 1.00 | 可分批买入 |
 | 002052 | 1.8700 | 54.44 | 1.07 | 可分批买入 |
 | 002112 | 3.2759 | 55.01 | 1.10 | 可分批买入 |
 | 002163 | 1.3490 | 52.46 | 1.06 | 可分批买入 |
@@ -399,4 +415,4 @@ Stacktrace:
 | 005118 | 1.6297 | 48.58 | 0.98 | 可分批买入 |
 | 005312 | 2.1157 | 50.04 | 1.03 | 可分批买入 |
 
-2025-09-18 00:34:51,754 - INFO - 脚本执行完成
+2025-09-18 00:46:07,498 - INFO - 脚本执行完成
