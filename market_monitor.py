@@ -122,8 +122,6 @@ class MarketMonitor:
                 response = requests.get(url, headers=self.headers, timeout=10)
                 response.raise_for_status()
                 
-                # --- 修改开始：解决数据解析问题 ---
-                # 使用正则表达式提取 apidata 变量中的 content 和 pages 值
                 content_match = re.search(r'content:"(.*?)"', response.text, re.S)
                 pages_match = re.search(r'pages:(\d+)', response.text)
                 
@@ -134,7 +132,6 @@ class MarketMonitor:
                 raw_content_html = content_match.group(1).replace('\\"', '"')
                 total_pages = int(pages_match.group(1))
                 
-                # 使用 pandas 的 read_html 直接解析提取出的 HTML 字符串
                 tables = pd.read_html(StringIO(raw_content_html))
                 
                 if not tables:
@@ -144,12 +141,10 @@ class MarketMonitor:
                 df = tables[0]
                 df.columns = ['date', 'net_value', 'cumulative_net_value', 'daily_growth_rate', 'purchase_status', 'redemption_status', 'dividend']
 
-                # 选择并处理我们需要的列
                 df = df[['date', 'net_value']].copy()
                 df['date'] = pd.to_datetime(df['date'], errors='coerce')
                 df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
                 df = df.dropna(subset=['date', 'net_value'])
-                # --- 修改结束：解决数据解析问题 ---
                 
                 if latest_local_date:
                     new_df = df[df['date'].dt.date > latest_local_date]
@@ -216,22 +211,17 @@ class MarketMonitor:
             if df is not None and not df.empty and len(df) >= 26:  # 确保有足够数据计算MACD
                 df = df.sort_values(by='date', ascending=True)
                 
-                # --- 新增 MACD 和布林带计算 ---
-                # MACD
                 exp12 = df['net_value'].ewm(span=12, adjust=False).mean()
                 exp26 = df['net_value'].ewm(span=26, adjust=False).mean()
                 df['macd'] = exp12 - exp26
                 df['signal'] = df['macd'].ewm(span=9, adjust=False).mean()
 
-                # 布林带
                 window = 20
                 df['bb_mid'] = df['net_value'].rolling(window=window, min_periods=1).mean()
                 df['bb_std'] = df['net_value'].rolling(window=window, min_periods=1).std()
                 df['bb_upper'] = df['bb_mid'] + (df['bb_std'] * 2)
                 df['bb_lower'] = df['bb_mid'] - (df['bb_std'] * 2)
-                # --- 新增结束 ---
                 
-                # RSI (你原有的代码，已修改为更稳健的计算方式)
                 delta = df['net_value'].diff()
                 gain = delta.where(delta > 0, 0)
                 loss = -delta.where(delta < 0, 0)
@@ -241,7 +231,6 @@ class MarketMonitor:
                 rs = avg_gain / avg_loss.replace(0, np.nan)
                 rsi = 100 - (100 / (1 + rs))
 
-                # MA50
                 ma50 = df['net_value'].rolling(window=min(50, len(df)), min_periods=1).mean()
                 
                 latest_data = df.iloc[-1]
@@ -250,28 +239,22 @@ class MarketMonitor:
                 latest_ma50 = ma50.iloc[-1]
                 latest_ma50_ratio = latest_net_value / latest_ma50 if not pd.isna(latest_ma50) and latest_ma50 != 0 else np.nan
                 
-                # --- 增加 MACD 和布林带的最新值 ---
                 latest_macd_diff = latest_data['macd'] - latest_data['signal'] if 'macd' in latest_data and 'signal' in latest_data else np.nan
                 latest_bb_upper = latest_data['bb_upper'] if 'bb_upper' in latest_data else np.nan
                 latest_bb_lower = latest_data['bb_lower'] if 'bb_lower' in latest_data else np.nan
 
-                # 增加更智能的投资建议逻辑
                 advice = "观察"
-                # 等待回调信号：RSI超买 或 净值在布林带上轨上方 或 净值/MA50过高
                 if (not np.isnan(latest_rsi) and latest_rsi > 70) or \
                    (not np.isnan(latest_bb_upper) and latest_net_value > latest_bb_upper) or \
                    (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio > 1.2):
                     advice = "等待回调"
-                # 可分批买入信号：RSI超卖 或 净值在布林带下轨下方 或 净值/MA50过低
                 elif (not np.isnan(latest_rsi) and latest_rsi < 30) or \
                      (not np.isnan(latest_bb_lower) and latest_net_value < latest_bb_lower) or \
                      (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 0.8):
                     advice = "可分批买入"
-                # 强势信号：净值在MA50上方且MACD金叉
                 elif (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio > 1) and \
                      (not np.isnan(latest_macd_diff) and latest_macd_diff > 0):
                     advice = "可分批买入"
-                # 弱势信号：净值在MA50下方且MACD死叉
                 elif (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 1) and \
                      (not np.isnan(latest_macd_diff) and latest_macd_diff < 0):
                     advice = "等待回调"
