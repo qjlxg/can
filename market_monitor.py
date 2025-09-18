@@ -9,6 +9,7 @@ from io import StringIO
 import requests
 import tenacity
 import concurrent.futures
+import time as time_module # 修复了这里的导入错误
 
 # 配置日志
 logging.basicConfig(
@@ -108,17 +109,16 @@ class MarketMonitor:
         
         # 判断是否需要进行网络请求
         is_up_to_date = latest_local_date is not None and latest_local_date >= today
-        # 晚上21:00后才更新当天净值
         is_after_update_time = current_time >= time(21, 0)
         
+        # 如果本地数据已是最新（包括当天），且时间早于更新点，则直接返回本地数据
         if is_up_to_date and not is_after_update_time:
             logger.info(f"基金 {fund_code} 本地数据已是最新，且时间早于更新点，直接使用本地缓存。")
             return local_df.tail(100)[['date', 'net_value']]
         
-        # 从API获取数据，从第1页开始
+        # 从API获取新数据
         all_new_data = []
         page_index = 1
-        found_new_data = False
         
         while True:
             url = f"http://fundf10.eastmoney.com/F10DataApi.aspx?type=lsjz&code={fund_code}&page={page_index}&per=20"
@@ -156,12 +156,10 @@ class MarketMonitor:
                     new_df = df[df['date'].dt.date > latest_local_date]
                     if not new_df.empty:
                         all_new_data.append(new_df)
-                        found_new_data = True
                         logger.info("第 %d 页: 发现 %d 行新数据", page_index, len(new_df))
                     
-                    # 如果这页没有新数据，并且不是最后一页，则说明本地数据已是最新，可以停止
-                    if new_df.empty:
-                        logger.info("基金 %s 已获取到最新数据，爬取结束", fund_code)
+                    if new_df.empty and page_index == 1:
+                        logger.info("基金 %s 无新数据，爬取结束", fund_code)
                         break
                 else:
                     # 如果本地没有数据，则获取所有历史数据
@@ -176,7 +174,7 @@ class MarketMonitor:
                     break
                 
                 page_index += 1
-                time.sleep(random.uniform(0.5, 1.5)) # 增加延迟，防止被封
+                time_module.sleep(random.uniform(0.5, 1.5)) # 修复了这里的 sleep 调用
                 
             except requests.exceptions.RequestException as e:
                 logger.error("基金 %s API请求失败: %s", fund_code, str(e))
@@ -187,9 +185,7 @@ class MarketMonitor:
 
         # 合并新数据和旧数据
         if all_new_data:
-            # 合并所有新抓取的数据
             new_combined_df = pd.concat(all_new_data, ignore_index=True)
-            # 合并本地数据与新抓取数据，以日期为准，用新数据覆盖旧数据
             df_final = pd.concat([local_df, new_combined_df]).drop_duplicates(subset=['date'], keep='last').sort_values(by='date', ascending=True)
             self._save_to_local_file(fund_code, df_final)
             df_final = df_final.tail(100)
@@ -197,7 +193,6 @@ class MarketMonitor:
                              fund_code, len(df_final), df_final['date'].iloc[-1].strftime('%Y-%m-%d'), df_final['net_value'].iloc[-1])
             return df_final[['date', 'net_value']]
         else:
-            # 如果没有新数据，或者抓取失败，返回本地数据
             if not local_df.empty:
                 logger.info("基金 %s 无新数据，使用本地历史数据", fund_code)
                 return local_df.tail(100)[['date', 'net_value']]
@@ -209,7 +204,7 @@ class MarketMonitor:
         try:
             df = self._get_fund_data_from_api(fund_code)
             
-            if df is not None and not df.empty and len(df) >= 26:  # 确保有足够数据计算MACD
+            if df is not None and not df.empty and len(df) >= 26:
                 df = df.sort_values(by='date', ascending=True)
                 
                 exp12 = df['net_value'].ewm(span=12, adjust=False).mean()
@@ -322,14 +317,19 @@ class MarketMonitor:
         for fund_code in self.fund_codes:
             if fund_code in self.fund_data and self.fund_data[fund_code] is not None:
                 data = self.fund_data[fund_code]
+                
+                latest_net_value_str = f"{data['latest_net_value']:.4f}" if isinstance(data['latest_net_value'], (float, int)) else str(data['latest_net_value'])
+                rsi_str = f"{data['rsi']:.2f}" if not np.isnan(data['rsi']) else "N/A"
+                ma_ratio_str = f"{data['ma_ratio']:.2f}" if not np.isnan(data['ma_ratio']) else "N/A"
+                
                 report_df_list.append({
                     "基金代码": fund_code,
-                    "最新净值": f"{data['latest_net_value']:.4f}",
-                    "RSI": f"{data['rsi']:.2f}" if not np.isnan(data['rsi']) else "N/A",
-                    "净值/MA50": f"{data['ma_ratio']:.2f}" if not np.isnan(data['ma_ratio']) else "N/A",
+                    "最新净值": latest_net_value_str,
+                    "RSI": rsi_str,
+                    "净值/MA50": ma_ratio_str,
                     "MACD信号": "金叉" if not np.isnan(data['macd_diff']) and data['macd_diff'] > 0 else "死叉" if not np.isnan(data['macd_diff']) and data['macd_diff'] < 0 else "N/A",
-                    "布林带位置": "上轨上方" if not np.isnan(data['bb_upper']) and data['latest_net_value'] > data['bb_upper'] else \
-                                 "下轨下方" if not np.isnan(data['bb_lower']) and data['latest_net_value'] < data['bb_lower'] else "中轨",
+                    "布林带位置": "上轨上方" if not np.isnan(data['bb_upper']) and (isinstance(data['latest_net_value'], (float, int)) and data['latest_net_value'] > data['bb_upper']) else \
+                                 "下轨下方" if not np.isnan(data['bb_lower']) and (isinstance(data['latest_net_value'], (float, int)) and data['latest_net_value'] < data['bb_lower']) else "中轨",
                     "投资建议": data['advice']
                 })
             else:
