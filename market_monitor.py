@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchElementException, StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException, WebDriverException
 import requests
 import tenacity
 
@@ -47,14 +47,19 @@ class MarketMonitor:
                 content = f.read()
             logger.info("analysis_report.md 内容（前1000字符）: %s", content[:1000])
             
+            # 使用更精确的正则表达式来匹配基金代码
+            # 1. 匹配表格中的基金代码，例如：| 007509 |
+            # 2. 匹配详细分析中的基金代码，例如：### 基金 001407 -
             pattern = re.compile(r'(?:^\| +(\d{6})|### 基金 (\d{6}))', re.M)
             matches = pattern.findall(content)
 
             extracted_codes = set()
             for match in matches:
+                # findall 返回的是一个元组，我们需要提取非空的那个
                 code = match[0] if match[0] else match[1]
                 extracted_codes.add(code)
             
+            # 将集合转换为列表并进行排序
             sorted_codes = sorted(list(extracted_codes))
             self.fund_codes = sorted_codes[:10]  # 限制前10个有效代码
             
@@ -76,7 +81,7 @@ class MarketMonitor:
         before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[1]}，第 {retry_state.attempt_number} 次")
     )
     def _get_fund_data_from_eastmoney(self, fund_code):
-        """使用 Selenium 从 fund.eastmoney.com 抓取基金历史净值数据（含翻页）"""
+        """使用 Selenium 从 fund.eastmoney.com 抓取基金历史净值数据（含URL参数翻页）"""
         logger.info("正在获取基金 %s 的净值数据...", fund_code)
         
         driver = None
@@ -94,33 +99,28 @@ class MarketMonitor:
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=options)
             
-            url = f"http://fundf10.eastmoney.com/jjjz_{fund_code}.html"
-            driver.set_page_load_timeout(20)
-            driver.get(url)
-            logger.info("访问URL: %s", url)
-
             all_data = []
-            page_count = 1
-            max_pages = 50  # 增加最大翻页数，适应上百页的情况
-            target_rows = 100  # 目标数据行数
+            page_index = 1
+            max_pages = 200  # 设置最大翻页数，防止无限循环
             
-            while page_count <= max_pages:
+            while page_index <= max_pages:
                 try:
-                    # 等待表格容器加载，并确保内容可见
+                    url = f"http://fundf10.eastmoney.com/jjjz_{fund_code}.html?p={page_index}"
+                    driver.set_page_load_timeout(20)
+                    driver.get(url)
+                    logger.info("访问URL: %s", url)
+                    
+                    # 等待表格容器加载
                     wait = WebDriverWait(driver, 20)
                     wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
-                    logger.info("第 %d 页: 历史净值表格容器加载完成并可见", page_count)
-
-                    # 等待分页导航加载
-                    wait.until(EC.presence_of_element_located((By.ID, 'pagebar')))
-                    logger.info("第 %d 页: 分页导航容器加载完成", page_count)
+                    logger.info("第 %d 页: 历史净值表格容器加载完成并可见", page_index)
 
                     # 解析当前页面表格
                     table_html = driver.find_element(By.ID, 'jztable').get_attribute('innerHTML')
                     df_list = pd.read_html(StringIO(table_html), flavor='lxml')
                     
                     if not df_list or df_list[0].empty:
-                        logger.warning("第 %d 页: 表格内容为空，可能已无更多数据", page_count)
+                        logger.warning("第 %d 页: 表格内容为空，可能已无更多数据", page_index)
                         break
 
                     df = df_list[0]
@@ -130,37 +130,15 @@ class MarketMonitor:
                     df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
                     df = df.dropna(subset=['date', 'net_value'])
                     all_data.append(df)
-                    logger.info("第 %d 页: 解析成功，获取 %d 行数据", page_count, len(df))
-
-                    # 检查数据量是否已达到目标
-                    total_rows = sum(len(d) for d in all_data)
-                    if total_rows >= target_rows:
-                        logger.info("基金 %s 已获取 %d 行数据，达到目标行数，停止翻页", fund_code, total_rows)
+                    logger.info("第 %d 页: 解析成功，获取 %d 行数据", page_index, len(df))
+                    
+                    # 检查是否为最后一页（数据量小于20行，通常表示已到最后一页）
+                    if len(df) < 20:
+                        logger.info("基金 %s 数据量不足20行，翻页结束", fund_code)
                         break
 
-                    # 检查是否有下一页按钮
-                    try:
-                        next_button_xpath = "//div[@id='pagebar']//a[contains(@class, 'next') and not(contains(@class, 'nolink'))]"
-                        wait_long = WebDriverWait(driver, 15)  # 延长等待时间
-                        next_button = wait_long.until(EC.visibility_of_element_located((By.XPATH, next_button_xpath)))
-                        wait_long.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
-                        
-                        # 滚动到按钮并点击
-                        driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
-                        driver.execute_script("arguments[0].click();", next_button)
-                        
-                        # 等待新页面表格加载
-                        wait.until(EC.presence_of_element_located((By.XPATH, "//table[@class='w782 comm lsjz']/tbody/tr[1]")))
-                        logger.info("第 %d 页: 成功翻到下一页", page_count)
-                        page_count += 1
-                        time.sleep(random.uniform(3, 5))  # 增加延迟
-
-                    except (NoSuchElementException, StaleElementReferenceException) as e:
-                        logger.info("基金 %s 无下一页按钮，或按钮已失效，翻页结束: %s", fund_code, str(e))
-                        break
-                    except TimeoutException as e:
-                        logger.info("基金 %s 等待下一页按钮超时，可能已到达最后一页: %s", fund_code, str(e))
-                        break
+                    page_index += 1
+                    time.sleep(random.uniform(2, 4))  # 增加延迟以模拟人工操作
 
                 except TimeoutException as e:
                     logger.error("基金 %s 页面加载超时: %s", fund_code, str(e))
@@ -172,12 +150,11 @@ class MarketMonitor:
             if all_data:
                 df = pd.concat(all_data, ignore_index=True)
                 df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
-                total_rows = len(df)
-                if total_rows < target_rows:
-                    logger.warning("基金 %s 数据量不足，仅获取 %d 行，预期 %d 行", fund_code, total_rows, target_rows)
-                df = df.tail(target_rows)  # 取最近 100 天
+                if len(df) < 100:
+                    logger.warning("基金 %s 数据量不足，仅获取 %d 行，预期 100 行", fund_code, len(df))
+                df = df.tail(100)  # 取最近 100 天
                 logger.info("成功解析基金 %s 的数据，共获取 %d 页，总行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                            fund_code, page_count, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
+                                 fund_code, page_index - 1, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
                 return df[['date', 'net_value']]
             else:
                 raise ValueError("未获取到任何有效数据")
@@ -213,6 +190,7 @@ class MarketMonitor:
                     avg_gain = gain.rolling(window=14, min_periods=1).mean()
                     avg_loss = loss.rolling(window=14, min_periods=1).mean()
                     
+                    # 避免除以0
                     rs = avg_gain / avg_loss.replace(0, np.nan)
                     rsi = 100 - (100 / (1 + rs))
                     
@@ -230,13 +208,14 @@ class MarketMonitor:
                         'ma_ratio': latest_ma50_ratio
                     }
                     logger.info("成功计算基金 %s 的技术指标: 净值=%.4f, RSI=%.2f, MA50比率=%.2f", 
-                                fund_code, latest_net_value, latest_rsi, latest_ma50_ratio)
+                                 fund_code, latest_net_value, latest_rsi, latest_ma50_ratio)
                 else:
                     self.fund_data[fund_code] = None
                     logger.warning("基金 %s 数据获取失败或数据不足，跳过计算 (数据行数: %s)", fund_code, len(df) if df is not None else 0)
                 
                 for handler in logger.handlers:
                     handler.flush()
+                # 在处理完一个基金后，随机延迟1到3秒
                 time.sleep(random.uniform(1, 3))
             except Exception as e:
                 logger.error("处理基金 %s 时发生异常: %s", fund_code, str(e))
@@ -263,6 +242,7 @@ class MarketMonitor:
                         rsi = data['rsi']
                         ma_ratio = data['ma_ratio']
 
+                        # 使用更安全的格式化逻辑
                         rsi_str = f"{rsi:.2f}" if not np.isnan(rsi) else "N/A"
                         ma_ratio_str = f"{ma_ratio:.2f}" if not np.isnan(ma_ratio) else "N/A"
 
