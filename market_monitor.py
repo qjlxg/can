@@ -122,27 +122,34 @@ class MarketMonitor:
                 response = requests.get(url, headers=self.headers, timeout=10)
                 response.raise_for_status()
                 
-                # 使用正则表达式提取数据
-                content_match = re.search(r'content:"(.*?)"', response.text)
-                records_match = re.search(r'records:(\d+)', response.text)
+                # --- 修改开始：解决数据解析问题 ---
+                # 使用正则表达式提取 apidata 变量中的 content 和 pages 值
+                content_match = re.search(r'content:"(.*?)"', response.text, re.S)
                 pages_match = re.search(r'pages:(\d+)', response.text)
                 
-                if not content_match or not records_match or not pages_match:
+                if not content_match or not pages_match:
                     logger.error("基金 %s API返回内容格式不正确，可能已无数据或接口变更", fund_code)
                     break
-                
-                raw_content = content_match.group(1)
-                total_records = int(records_match.group(1))
+
+                raw_content_html = content_match.group(1).replace('\\"', '"')
                 total_pages = int(pages_match.group(1))
                 
-                # 使用StringIO包装数据，使其像文件一样可读，便于pandas解析
-                df = pd.read_csv(StringIO(raw_content), sep=' ', header=0, names=['date', 'net_value', 'cumulative_net_value', 'daily_growth_rate', 'purchase_status', 'redemption_status', 'dividend'])
+                # 使用 pandas 的 read_html 直接解析提取出的 HTML 字符串
+                tables = pd.read_html(StringIO(raw_content_html))
                 
+                if not tables:
+                    logger.warning("基金 %s 在第 %d 页未找到数据表格，爬取结束", fund_code, page_index)
+                    break
+                
+                df = tables[0]
+                df.columns = ['date', 'net_value', 'cumulative_net_value', 'daily_growth_rate', 'purchase_status', 'redemption_status', 'dividend']
+
+                # 选择并处理我们需要的列
                 df = df[['date', 'net_value']].copy()
-                df.columns = ['date', 'net_value']
                 df['date'] = pd.to_datetime(df['date'], errors='coerce')
                 df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
                 df = df.dropna(subset=['date', 'net_value'])
+                # --- 修改结束：解决数据解析问题 ---
                 
                 if latest_local_date:
                     new_df = df[df['date'].dt.date > latest_local_date]
@@ -190,8 +197,8 @@ class MarketMonitor:
                 logger.warning("基金 %s 总数据量不足，仅获取 %d 行", fund_code, len(df_combined))
             
             df_combined = df_combined.tail(100)
-            logger.info("成功解析基金 %s 的数据，共获取 %d 页，总行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                             fund_code, page_index - 1, len(df_combined), df_combined['date'].iloc[-1].strftime('%Y-%m-%d'), df_combined['net_value'].iloc[-1])
+            logger.info("成功解析基金 %s 的数据，总行数: %d, 最新日期: %s, 最新净值: %.4f", 
+                                fund_code, len(df_combined), df_combined['date'].iloc[-1].strftime('%Y-%m-%d'), df_combined['net_value'].iloc[-1])
             return df_combined[['date', 'net_value']]
         else:
             if not local_df.empty:
