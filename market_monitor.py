@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 import re
@@ -11,7 +10,6 @@ import requests
 import tenacity
 import concurrent.futures
 import time as time_module
-from pandas.api.types import CategoricalDtype
 
 # 配置日志
 logging.basicConfig(
@@ -42,10 +40,13 @@ class MarketMonitor:
     def _get_expected_latest_date(self):
         """根据当前时间确定期望的最新数据日期"""
         now = datetime.now()
+        # 假设净值更新时间为晚上21:00
         update_time = time(21, 0)
         if now.time() < update_time:
+            # 如果当前时间早于21:00，则期望最新日期为昨天
             expected_date = now.date() - timedelta(days=1)
         else:
+            # 否则，期望最新日期为今天
             expected_date = now.date()
         logger.info("当前时间: %s, 期望最新数据日期: %s", now.strftime('%Y-%m-%d %H:%M:%S'), expected_date)
         return expected_date
@@ -147,6 +148,7 @@ class MarketMonitor:
                 df = df.dropna(subset=['date', 'net_value'])
                 
                 if latest_local_date:
+                    # 只获取比本地最新日期更新的数据
                     new_df = df[df['date'].dt.date > latest_local_date]
                     if not new_df.empty:
                         all_new_data.append(new_df)
@@ -156,6 +158,7 @@ class MarketMonitor:
                         logger.info("基金 %s 无新数据，爬取结束", fund_code)
                         break
                 else:
+                    # 如果本地没有数据，则获取所有历史数据
                     all_new_data.append(df)
                     if len(df) < 20:
                         break
@@ -167,7 +170,7 @@ class MarketMonitor:
                     break
                 
                 page_index += 1
-                time_module.sleep(random.uniform(1, 2))
+                time_module.sleep(random.uniform(1, 2))  # 延长sleep到1-2秒，减少限速风险
                 
             except requests.exceptions.RequestException as e:
                 logger.error("基金 %s API请求失败: %s", fund_code, str(e))
@@ -176,13 +179,14 @@ class MarketMonitor:
                 logger.error("基金 %s API数据解析失败: %s", fund_code, str(e))
                 raise
 
+        # 合并新数据和旧数据
         if all_new_data:
             new_combined_df = pd.concat(all_new_data, ignore_index=True)
             df_final = pd.concat([local_df, new_combined_df]).drop_duplicates(subset=['date'], keep='last').sort_values(by='date', ascending=True)
             self._save_to_local_file(fund_code, df_final)
             df_final = df_final.tail(100)
             logger.info("成功合并并保存基金 %s 的数据，总行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                        fund_code, len(df_final), df_final['date'].iloc[-1].strftime('%Y-%m-%d'), df_final['net_value'].iloc[-1])
+                                 fund_code, len(df_final), df_final['date'].iloc[-1].strftime('%Y-%m-%d'), df_final['net_value'].iloc[-1])
             return df_final[['date', 'net_value']]
         else:
             if not local_df.empty:
@@ -192,13 +196,13 @@ class MarketMonitor:
                 raise ValueError("未获取到任何有效数据，且本地无缓存")
 
     def _calculate_indicators(self, fund_code, df):
-        """计算技术指标并生成结果字典，新增 action_signal"""
+        """计算技术指标并生成结果字典"""
         try:
             if df is None or df.empty or len(df) < 26:
                 logger.warning("基金 %s 数据获取失败或数据不足，跳过计算 (数据行数: %s)", fund_code, len(df) if df is not None else 0)
                 return {
                     'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': np.nan, 'ma_ratio': np.nan,
-                    'macd_diff': np.nan, 'bb_upper': np.nan, 'bb_lower': np.nan, 'advice': "观察", 'action_signal': "无明确信号"
+                    'macd_diff': np.nan, 'bb_upper': np.nan, 'bb_lower': np.nan, 'advice': "观察", 'action_signal': 'N/A'
                 }
 
             df = df.sort_values(by='date', ascending=True)
@@ -235,7 +239,6 @@ class MarketMonitor:
             latest_bb_upper = latest_data['bb_upper'] if 'bb_upper' in latest_data else np.nan
             latest_bb_lower = latest_data['bb_lower'] if 'bb_lower' in latest_data else np.nan
 
-            # 原有 advice 逻辑
             advice = "观察"
             if (not np.isnan(latest_rsi) and latest_rsi > 70) or \
                (not np.isnan(latest_bb_upper) and latest_net_value > latest_bb_upper) or \
@@ -252,18 +255,40 @@ class MarketMonitor:
                  (not np.isnan(latest_macd_diff) and latest_macd_diff < 0):
                 advice = "等待回调"
 
-            # 新增 action_signal 逻辑
-            action_signal = "无明确信号"
-            if not np.isnan(latest_rsi) and not np.isnan(latest_ma50_ratio) and not np.isnan(latest_macd_diff):
-                if latest_rsi < 35 and latest_ma50_ratio < 0.9 and latest_macd_diff > 0:
-                    action_signal = "强买入"
-                    logger.info("基金 %s 触发强买入信号: RSI=%.2f, 净值/MA50=%.2f, MACD金叉", fund_code, latest_rsi, latest_ma50_ratio)
-                elif latest_rsi < 50 and latest_ma50_ratio < 1.0 and latest_macd_diff > 0:
-                    action_signal = "弱买入"
-                    logger.info("基金 %s 触发弱买入信号: RSI=%.2f, 净值/MA50=%.2f, MACD金叉", fund_code, latest_rsi, latest_ma50_ratio)
-                elif latest_rsi > 70 or latest_ma50_ratio > 1.2 or (latest_macd_diff < 0 and latest_net_value > latest_bb_upper):
-                    action_signal = "强卖出/规避"
-                    logger.info("基金 %s 触发强卖出/规避信号: RSI=%.2f, 净值/MA50=%.2f, MACD/布林带状态", fund_code, latest_rsi, latest_ma50_ratio)
+            # 新增的机械化投资决策逻辑
+            action_signal = "持有/观察"
+
+            # 强卖出/规避信号（止损逻辑）: 净值跌破MA50的5%
+            if not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 0.95:
+                action_signal = "强卖出/规避"
+            # 强卖出/规避信号: 满足多个消极条件
+            elif (not np.isnan(latest_rsi) and latest_rsi > 70) and \
+               (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio > 1.2) and \
+               (not np.isnan(latest_macd_diff) and latest_macd_diff < 0):
+                action_signal = "强卖出/规避"
+            # 弱卖出/规避信号：满足部分消极条件
+            elif (not np.isnan(latest_rsi) and latest_rsi > 65) or \
+                 (not np.isnan(latest_bb_upper) and latest_net_value > latest_bb_upper) or \
+                 (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio > 1.2):
+                action_signal = "弱卖出/规避"
+            # 强买入信号：满足多个积极条件
+            elif (not np.isnan(latest_rsi) and latest_rsi < 35) and \
+               (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 0.9) and \
+               (not np.isnan(latest_macd_diff) and latest_macd_diff > 0):
+                action_signal = "强买入"
+            # 弱买入信号：满足部分积极条件
+            elif (not np.isnan(latest_rsi) and latest_rsi < 45) or \
+                 (not np.isnan(latest_bb_lower) and latest_net_value < latest_bb_lower) or \
+                 (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 1):
+                action_signal = "弱买入"
+            
+            # 如果是买入信号，则强制覆盖卖出信号
+            # 这段逻辑保证买入信号的优先级高于卖出信号，但新的排序逻辑已涵盖此功能
+            # if action_signal in ["强买入", "弱买入"] and latest_ma50_ratio > 1.2:
+            #     action_signal = action_signal
+            # elif action_signal in ["强卖出/规避", "弱卖出/规避"] and latest_ma50_ratio < 1:
+            #     action_signal = action_signal
+
 
             return {
                 'fund_code': fund_code,
@@ -288,7 +313,7 @@ class MarketMonitor:
                 'bb_upper': np.nan,
                 'bb_lower': np.nan,
                 'advice': "观察",
-                'action_signal': "无明确信号"
+                'action_signal': 'N/A'
             }
         finally:
             for handler in logger.handlers:
@@ -296,15 +321,17 @@ class MarketMonitor:
 
     def get_fund_data(self):
         """主控函数：优先从本地加载，仅在数据非最新或不完整时下载"""
+        # 步骤1: 解析推荐基金代码
         self._parse_report()
         if not self.fund_codes:
             logger.error("没有提取到任何基金代码，无法继续处理")
             return
 
+        # 步骤2: 预加载本地数据并检查是否需要下载
         logger.info("开始预加载本地缓存数据...")
         fund_codes_to_fetch = []
         expected_latest_date = self._get_expected_latest_date()
-        min_data_points = 26
+        min_data_points = 26  # 确保有足够数据计算技术指标
 
         for fund_code in self.fund_codes:
             local_df = self._read_local_data(fund_code)
@@ -313,23 +340,25 @@ class MarketMonitor:
                 latest_local_date = local_df['date'].max().date()
                 data_points = len(local_df)
                 
+                # 检查数据是否最新且完整
                 if latest_local_date >= expected_latest_date and data_points >= min_data_points:
                     logger.info("基金 %s 的本地数据已是最新 (%s, 期望: %s) 且数据量足够 (%d 行)，直接加载。",
-                                fund_code, latest_local_date, expected_latest_date, data_points)
+                                 fund_code, latest_local_date, expected_latest_date, data_points)
                     self.fund_data[fund_code] = self._calculate_indicators(fund_code, local_df.tail(100))
                     continue
                 else:
                     if latest_local_date < expected_latest_date:
                         logger.info("基金 %s 本地数据已过时（最新日期为 %s，期望 %s），需要从网络获取新数据。",
-                                    fund_code, latest_local_date, expected_latest_date)
+                                     fund_code, latest_local_date, expected_latest_date)
                     if data_points < min_data_points:
                         logger.info("基金 %s 本地数据量不足（仅 %d 行，需至少 %d 行），需要从网络获取。",
-                                    fund_code, data_points, min_data_points)
+                                     fund_code, data_points, min_data_points)
             else:
                 logger.info("基金 %s 本地数据不存在，需要从网络获取。", fund_code)
             
             fund_codes_to_fetch.append(fund_code)
 
+        # 步骤3: 多线程网络下载
         if fund_codes_to_fetch:
             logger.info("开始使用多线程获取 %d 个基金的新数据...", len(fund_codes_to_fetch))
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -344,8 +373,7 @@ class MarketMonitor:
                         logger.error("获取和处理基金 %s 数据时出错: %s", fund_code, str(e))
                         self.fund_data[fund_code] = {
                             'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': np.nan,
-                            'ma_ratio': np.nan, 'macd_diff': np.nan, 'bb_upper': np.nan, 'bb_lower': np.nan,
-                            'advice': "观察", 'action_signal': "无明确信号"
+                            'ma_ratio': np.nan, 'macd_diff': np.nan, 'bb_upper': np.nan, 'bb_lower': np.nan, 'advice': "观察", 'action_signal': 'N/A'
                         }
         else:
             logger.info("所有基金数据均来自本地缓存，无需网络下载。")
@@ -356,7 +384,7 @@ class MarketMonitor:
             logger.error("所有基金数据均获取失败。")
 
     def generate_report(self):
-        """生成市场情绪与技术指标监控报告，按 action_signal 排序"""
+        """生成市场情绪与技术指标监控报告"""
         logger.info("正在生成市场监控报告...")
         report_df_list = []
         for fund_code in self.fund_codes:
@@ -370,7 +398,7 @@ class MarketMonitor:
                 if isinstance(data['macd_diff'], (float, int)) and not np.isnan(data['macd_diff']):
                     macd_signal = "金叉" if data['macd_diff'] > 0 else "死叉"
                 
-                bollinger_pos = "中轨"
+                bollinger_pos = "中轨"  # 默认中轨
                 if isinstance(data['latest_net_value'], (float, int)):
                     if isinstance(data['bb_upper'], (float, int)) and not np.isnan(data['bb_upper']) and data['latest_net_value'] > data['bb_upper']:
                         bollinger_pos = "上轨上方"
@@ -398,21 +426,56 @@ class MarketMonitor:
                     "MACD信号": "N/A",
                     "布林带位置": "N/A",
                     "投资建议": "观察",
-                    "行动信号": "无明确信号"
+                    "行动信号": "N/A"
                 })
 
         report_df = pd.DataFrame(report_df_list)
+
+        # 定义排序优先级
+        order_map_action = {
+            "强买入": 1,
+            "弱买入": 2,
+            "持有/观察": 3,
+            "弱卖出/规避": 4,
+            "强卖出/规避": 5,
+            "N/A": 6
+        }
+        order_map_advice = {
+            "可分批买入": 1,
+            "观察": 2,
+            "等待回调": 3,
+            "N/A": 4
+        }
         
-        # 定义 action_signal 的排序优先级
-        signal_order = CategoricalDtype(categories=["强买入", "弱买入", "无明确信号", "强卖出/规避"], ordered=True)
-        report_df['行动信号'] = report_df['行动信号'].astype(signal_order)
-        report_df = report_df.sort_values(by='行动信号')
+        report_df['sort_order_action'] = report_df['行动信号'].map(order_map_action)
+        report_df['sort_order_advice'] = report_df['投资建议'].map(order_map_advice)
+        
+        # 将 NaN 替换为 N/A 并对净值等数据类型进行处理
+        report_df['最新净值'] = pd.to_numeric(report_df['最新净值'], errors='coerce')
+        report_df['RSI'] = pd.to_numeric(report_df['RSI'], errors='coerce')
+        report_df['净值/MA50'] = pd.to_numeric(report_df['净值/MA50'], errors='coerce')
+
+        # 按照您的新排序规则进行排序
+        report_df = report_df.sort_values(
+            by=['sort_order_action', 'sort_order_advice', 'RSI'],
+            ascending=[True, True, True] # 优先按行动信号、其次按投资建议、最后按RSI从低到高排序
+        ).drop(columns=['sort_order_action', 'sort_order_advice'])
+
+        # 将浮点数格式化为字符串，方便Markdown输出
+        report_df['最新净值'] = report_df['最新净值'].apply(lambda x: f"{x:.4f}" if not pd.isna(x) else "N/A")
+        report_df['RSI'] = report_df['RSI'].apply(lambda x: f"{x:.2f}" if not pd.isna(x) else "N/A")
+        report_df['净值/MA50'] = report_df['净值/MA50'].apply(lambda x: f"{x:.2f}" if not pd.isna(x) else "N/A")
+
+        # 将上述排序后的 DataFrame 转换为 Markdown
+        markdown_table = report_df.to_markdown(index=False)
         
         with open(self.output_file, 'w', encoding='utf-8') as f:
             f.write(f"# 市场情绪与技术指标监控报告\n\n")
             f.write(f"生成日期: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
             f.write(f"## 推荐基金技术指标 (处理基金数: {len(self.fund_codes)})\n")
-            f.write(report_df.to_markdown(index=False))
+            f.write("此表格已按**行动信号优先级**排序，'强买入'基金将排在最前面。\n")
+            f.write("**注意：** 当'行动信号'和'投资建议'冲突时，请以**行动信号**为准，其条件更严格，更适合机械化决策。\n\n")
+            f.write(markdown_table)
         
         logger.info("报告生成完成: %s", self.output_file)
 
