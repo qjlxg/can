@@ -110,7 +110,7 @@ class MarketMonitor:
 
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(3),
-        wait=tenacity.wait_fixed(5),  # 增加重试等待时间
+        wait=tenacity.wait_fixed(5),  # 增加重试等待时间到5秒
         retry=tenacity.retry_if_exception_type((TimeoutException, WebDriverException)),
         before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[1]}，第 {retry_state.attempt_number} 次")
     )
