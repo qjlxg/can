@@ -47,7 +47,6 @@ class MarketMonitor:
         try:
             with open(self.report_file, 'r', encoding='utf-8') as f:
                 content = f.read()
-            logger.info("analysis_report.md 内容（前1000字符）: %s", content[:1000])
             
             pattern = re.compile(r'(?:^\| +(\d{6})|### 基金 (\d{6}))', re.M)
             matches = pattern.findall(content)
@@ -64,8 +63,6 @@ class MarketMonitor:
                 logger.warning("未提取到任何有效基金代码，请检查 analysis_report.md")
             else:
                 logger.info("提取到 %d 个基金（测试限制前10个）: %s", len(self.fund_codes), self.fund_codes)
-            for handler in logger.handlers:
-                handler.flush()
             
         except Exception as e:
             logger.error("解析报告文件失败: %s", e)
@@ -97,24 +94,11 @@ class MarketMonitor:
         retry=tenacity.retry_if_exception_type((requests.exceptions.RequestException, ValueError)),
         before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[0]}，第 {retry_state.attempt_number} 次")
     )
-    def _get_fund_data_from_api(self, fund_code):
-        """优先使用本地缓存，仅在需要时增量更新或完整下载"""
+    def _fetch_fund_data(self, fund_code):
+        """从网络获取基金数据，并支持增量更新"""
         local_df = self._read_local_data(fund_code)
         latest_local_date = local_df['date'].max().date() if not local_df.empty else None
         
-        today = datetime.now().date()
-        current_time = datetime.now().time()
-        
-        # 判断是否需要进行网络请求
-        # 如果本地数据存在，且日期是今天，且时间早于21点，则直接使用本地数据并退出函数
-        is_up_to_date_and_before_21 = latest_local_date is not None and latest_local_date >= today and current_time < time(21, 0)
-        
-        if is_up_to_date_and_before_21:
-            logger.info(f"基金 {fund_code} 本地数据已是最新，且时间早于更新点，直接使用本地缓存。")
-            return local_df.tail(100)[['date', 'net_value']]
-        
-        # 以下代码只在需要更新数据时执行
-        logger.info("正在处理基金 %s 的数据...", fund_code)
         all_new_data = []
         page_index = 1
         
@@ -197,84 +181,77 @@ class MarketMonitor:
             else:
                 raise ValueError("未获取到任何有效数据，且本地无缓存")
 
-    def process_fund(self, fund_code):
-        """处理单个基金，用于多线程调用"""
+    def _calculate_indicators(self, fund_code, df):
+        """计算技术指标并生成结果字典"""
         try:
-            df = self._get_fund_data_from_api(fund_code)
-            
-            if df is not None and not df.empty and len(df) >= 26:
-                df = df.sort_values(by='date', ascending=True)
-                
-                exp12 = df['net_value'].ewm(span=12, adjust=False).mean()
-                exp26 = df['net_value'].ewm(span=26, adjust=False).mean()
-                df['macd'] = exp12 - exp26
-                df['signal'] = df['macd'].ewm(span=9, adjust=False).mean()
-
-                window = 20
-                df['bb_mid'] = df['net_value'].rolling(window=window, min_periods=1).mean()
-                df['bb_std'] = df['net_value'].rolling(window=window, min_periods=1).std()
-                df['bb_upper'] = df['bb_mid'] + (df['bb_std'] * 2)
-                df['bb_lower'] = df['bb_mid'] - (df['bb_std'] * 2)
-                
-                delta = df['net_value'].diff()
-                gain = delta.where(delta > 0, 0)
-                loss = -delta.where(delta < 0, 0)
-                avg_gain = gain.rolling(window=14, min_periods=1).mean()
-                avg_loss = loss.rolling(window=14, min_periods=1).mean()
-                
-                rs = avg_gain / avg_loss.replace(0, np.nan)
-                rsi = 100 - (100 / (1 + rs))
-
-                ma50 = df['net_value'].rolling(window=min(50, len(df)), min_periods=1).mean()
-                
-                latest_data = df.iloc[-1]
-                latest_net_value = latest_data['net_value']
-                latest_rsi = rsi.iloc[-1] if not pd.isna(rsi.iloc[-1]) else np.nan
-                latest_ma50 = ma50.iloc[-1]
-                latest_ma50_ratio = latest_net_value / latest_ma50 if not pd.isna(latest_ma50) and latest_ma50 != 0 else np.nan
-                
-                latest_macd_diff = latest_data['macd'] - latest_data['signal'] if 'macd' in latest_data and 'signal' in latest_data else np.nan
-                latest_bb_upper = latest_data['bb_upper'] if 'bb_upper' in latest_data else np.nan
-                latest_bb_lower = latest_data['bb_lower'] if 'bb_lower' in latest_data else np.nan
-
-                advice = "观察"
-                if (not np.isnan(latest_rsi) and latest_rsi > 70) or \
-                   (not np.isnan(latest_bb_upper) and latest_net_value > latest_bb_upper) or \
-                   (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio > 1.2):
-                    advice = "等待回调"
-                elif (not np.isnan(latest_rsi) and latest_rsi < 30) or \
-                     (not np.isnan(latest_bb_lower) and latest_net_value < latest_bb_lower) or \
-                     (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 0.8):
-                    advice = "可分批买入"
-                elif (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio > 1) and \
-                     (not np.isnan(latest_macd_diff) and latest_macd_diff > 0):
-                    advice = "可分批买入"
-                elif (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 1) and \
-                     (not np.isnan(latest_macd_diff) and latest_macd_diff < 0):
-                    advice = "等待回调"
-
-                return {
-                    'fund_code': fund_code,
-                    'latest_net_value': latest_net_value,
-                    'rsi': latest_rsi,
-                    'ma_ratio': latest_ma50_ratio,
-                    'macd_diff': latest_macd_diff,
-                    'bb_upper': latest_bb_upper,
-                    'bb_lower': latest_bb_lower,
-                    'advice': advice
-                }
-            else:
+            if df is None or df.empty or len(df) < 26:
                 logger.warning("基金 %s 数据获取失败或数据不足，跳过计算 (数据行数: %s)", fund_code, len(df) if df is not None else 0)
                 return {
-                    'fund_code': fund_code,
-                    'latest_net_value': "数据获取失败",
-                    'rsi': "N/A",
-                    'ma_ratio': "N/A",
-                    'macd_diff': "N/A",
-                    'bb_upper': "N/A",
-                    'bb_lower': "N/A",
-                    'advice': "观察"
+                    'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': "N/A", 'ma_ratio': "N/A",
+                    'macd_diff': "N/A", 'bb_upper': "N/A", 'bb_lower': "N/A", 'advice': "观察"
                 }
+
+            df = df.sort_values(by='date', ascending=True)
+            
+            exp12 = df['net_value'].ewm(span=12, adjust=False).mean()
+            exp26 = df['net_value'].ewm(span=26, adjust=False).mean()
+            df['macd'] = exp12 - exp26
+            df['signal'] = df['macd'].ewm(span=9, adjust=False).mean()
+
+            window = 20
+            df['bb_mid'] = df['net_value'].rolling(window=window, min_periods=1).mean()
+            df['bb_std'] = df['net_value'].rolling(window=window, min_periods=1).std()
+            df['bb_upper'] = df['bb_mid'] + (df['bb_std'] * 2)
+            df['bb_lower'] = df['bb_mid'] - (df['bb_std'] * 2)
+            
+            delta = df['net_value'].diff()
+            gain = delta.where(delta > 0, 0)
+            loss = -delta.where(delta < 0, 0)
+            avg_gain = gain.rolling(window=14, min_periods=1).mean()
+            avg_loss = loss.rolling(window=14, min_periods=1).mean()
+            
+            rs = avg_gain / avg_loss.replace(0, np.nan)
+            rsi = 100 - (100 / (1 + rs))
+
+            ma50 = df['net_value'].rolling(window=min(50, len(df)), min_periods=1).mean()
+            
+            latest_data = df.iloc[-1]
+            latest_net_value = latest_data['net_value']
+            latest_rsi = rsi.iloc[-1] if not pd.isna(rsi.iloc[-1]) else np.nan
+            latest_ma50 = ma50.iloc[-1]
+            latest_ma50_ratio = latest_net_value / latest_ma50 if not pd.isna(latest_ma50) and latest_ma50 != 0 else np.nan
+            
+            latest_macd_diff = latest_data['macd'] - latest_data['signal'] if 'macd' in latest_data and 'signal' in latest_data else np.nan
+            latest_bb_upper = latest_data['bb_upper'] if 'bb_upper' in latest_data else np.nan
+            latest_bb_lower = latest_data['bb_lower'] if 'bb_lower' in latest_data else np.nan
+
+            advice = "观察"
+            if (not np.isnan(latest_rsi) and latest_rsi > 70) or \
+               (not np.isnan(latest_bb_upper) and latest_net_value > latest_bb_upper) or \
+               (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio > 1.2):
+                advice = "等待回调"
+            elif (not np.isnan(latest_rsi) and latest_rsi < 30) or \
+                 (not np.isnan(latest_bb_lower) and latest_net_value < latest_bb_lower) or \
+                 (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 0.8):
+                advice = "可分批买入"
+            elif (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio > 1) and \
+                 (not np.isnan(latest_macd_diff) and latest_macd_diff > 0):
+                advice = "可分批买入"
+            elif (not np.isnan(latest_ma50_ratio) and latest_ma50_ratio < 1) and \
+                 (not np.isnan(latest_macd_diff) and latest_macd_diff < 0):
+                advice = "等待回调"
+
+            return {
+                'fund_code': fund_code,
+                'latest_net_value': latest_net_value,
+                'rsi': latest_rsi,
+                'ma_ratio': latest_ma50_ratio,
+                'macd_diff': latest_macd_diff,
+                'bb_upper': latest_bb_upper,
+                'bb_lower': latest_bb_lower,
+                'advice': advice
+            }
+
         except Exception as e:
             logger.error("处理基金 %s 时发生异常: %s", fund_code, str(e))
             return {
@@ -292,30 +269,55 @@ class MarketMonitor:
                 handler.flush()
 
     def get_fund_data(self):
-        """使用多线程获取所有基金的数据"""
-        logger.info("开始使用多线程获取 %d 个基金的数据...", len(self.fund_codes))
+        """主控函数：优先从本地加载，再用多线程下载新数据"""
         
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            results = list(executor.map(self.process_fund, self.fund_codes))
+        # 步骤1: 预加载本地数据
+        logger.info("开始预加载本地缓存数据...")
+        fund_codes_to_fetch = []
+        today = datetime.now().date()
+        
+        for fund_code in self.fund_codes:
+            local_df = self._read_local_data(fund_code)
+            
+            if not local_df.empty and local_df['date'].max().date() == today:
+                # 存在本地数据且为今日数据，直接加载并跳过网络请求
+                logger.info("基金 %s 的本地数据已是最新 (%s)，直接加载。", fund_code, local_df['date'].max().date())
+                self.fund_data[fund_code] = self._calculate_indicators(fund_code, local_df.tail(100))
+            else:
+                # 本地无数据或数据非今日，标记为需要网络获取
+                logger.info("基金 %s 本地数据不存在或非最新，需要从网络获取。", fund_code)
+                fund_codes_to_fetch.append(fund_code)
 
-        self.fund_data = {
-            result['fund_code']: result
-            for result in results if result is not None
-        }
-
+        # 步骤2: 多线程网络下载
+        if fund_codes_to_fetch:
+            logger.info("开始使用多线程获取 %d 个基金的新数据...", len(fund_codes_to_fetch))
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                future_to_code = {executor.submit(self._fetch_fund_data, code): code for code in fund_codes_to_fetch}
+                for future in concurrent.futures.as_completed(future_to_code):
+                    fund_code = future_to_code[future]
+                    try:
+                        df = future.result()
+                        result = self._calculate_indicators(fund_code, df)
+                        self.fund_data[fund_code] = result
+                    except Exception as e:
+                        logger.error("获取和处理基金 %s 数据时出错: %s", fund_code, str(e))
+                        self.fund_data[fund_code] = {
+                            'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': "N/A",
+                            'ma_ratio': "N/A", 'macd_diff': "N/A", 'bb_upper': "N/A", 'bb_lower': "N/A", 'advice': "观察"
+                        }
+        
         if len(self.fund_data) > 0:
             logger.info("所有基金数据处理完成。")
         else:
             logger.error("所有基金数据均获取失败。")
-
+    
     def generate_report(self):
         """生成市场情绪与技术指标监控报告"""
         logger.info("正在生成市场监控报告...")
         report_df_list = []
         for fund_code in self.fund_codes:
-            if fund_code in self.fund_data and self.fund_data[fund_code] is not None:
-                data = self.fund_data[fund_code]
-                
+            data = self.fund_data.get(fund_code)
+            if data is not None:
                 latest_net_value_str = f"{data['latest_net_value']:.4f}" if isinstance(data['latest_net_value'], (float, int)) else str(data['latest_net_value'])
                 rsi_str = f"{data['rsi']:.2f}" if not np.isnan(data['rsi']) else "N/A"
                 ma_ratio_str = f"{data['ma_ratio']:.2f}" if not np.isnan(data['ma_ratio']) else "N/A"
@@ -350,10 +352,6 @@ class MarketMonitor:
             f.write(report_df.to_markdown(index=False))
         
         logger.info("报告生成完成: %s", self.output_file)
-        with open(self.output_file, 'r', encoding='utf-8') as f:
-            logger.info("market_monitor_report.md 内容: \n%s", f.read())
-        for handler in logger.handlers:
-            handler.flush()
 
 if __name__ == "__main__":
     try:
@@ -365,6 +363,4 @@ if __name__ == "__main__":
         logger.info("脚本执行完成")
     except Exception as e:
         logger.error("脚本运行失败: %s", e)
-        for handler in logger.handlers:
-            handler.flush()
         raise
