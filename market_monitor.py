@@ -110,6 +110,12 @@ class MarketMonitor:
         
         latest_local_date, local_df = self._get_latest_local_date(fund_code)
         
+        if latest_local_date and (datetime.now().date() - latest_local_date) < timedelta(days=1):
+            logger.info(f"基金 {fund_code} 本地数据已是最新，无需更新。")
+            if len(local_df) < 100:
+                logger.warning("基金 %s 总数据量不足，仅获取 %d 行", fund_code, len(local_df))
+            return local_df.tail(100)[['date', 'net_value']]
+            
         all_data = []
         page_index = 1
         found_new_data = False
