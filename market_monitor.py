@@ -47,7 +47,6 @@ class MarketMonitor:
                 content = f.read()
             logger.info("analysis_report.md 内容（前1000字符）: %s", content[:1000])
             
-            # 使用更精确的正则表达式来匹配基金代码
             pattern = re.compile(r'(?:^\| +(\d{6})|### 基金 (\d{6}))', re.M)
             matches = pattern.findall(content)
 
@@ -102,7 +101,7 @@ class MarketMonitor:
 
             all_data = []
             page_count = 1
-            max_pages = 10  # 限制最大翻页数，避免无限循环
+            max_pages = 50  # 增加最大翻页数，适应上百页的情况
             target_rows = 100  # 目标数据行数
             
             while page_count <= max_pages:
@@ -141,24 +140,20 @@ class MarketMonitor:
 
                     # 检查是否有下一页按钮
                     try:
-                        next_button_xpath = "//div[@id='pagebar']/a[@class='next']"  # 使用推荐的XPath
-                        wait_short = WebDriverWait(driver, 10)
-                        next_button = wait_short.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
+                        next_button_xpath = "//div[@id='pagebar']//a[contains(@class, 'next') and not(contains(@class, 'nolink'))]"
+                        wait_long = WebDriverWait(driver, 15)  # 延长等待时间
+                        next_button = wait_long.until(EC.visibility_of_element_located((By.XPATH, next_button_xpath)))
+                        wait_long.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
                         
-                        # 检查按钮是否为不可点击状态
-                        button_class = next_button.get_attribute('class') or ''
-                        if 'nolink' in button_class or 'disabled' in button_class:
-                            logger.info("基金 %s 已到达最后一页，翻页结束", fund_code)
-                            break
-                        
-                        # 使用JavaScript点击，并滚动到按钮位置
+                        # 滚动到按钮并点击
                         driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
                         driver.execute_script("arguments[0].click();", next_button)
                         
-                        # 等待新页面表格内容加载
-                        wait_short.until(EC.presence_of_element_located((By.XPATH, "//table[@class='w782 comm lsjz']/tbody/tr[1]")))
+                        # 等待新页面表格加载
+                        wait.until(EC.presence_of_element_located((By.XPATH, "//table[@class='w782 comm lsjz']/tbody/tr[1]")))
+                        logger.info("第 %d 页: 成功翻到下一页", page_count)
                         page_count += 1
-                        time.sleep(random.uniform(3, 5))  # 增加延迟以等待页面加载
+                        time.sleep(random.uniform(3, 5))  # 增加延迟
 
                     except (NoSuchElementException, StaleElementReferenceException) as e:
                         logger.info("基金 %s 无下一页按钮，或按钮已失效，翻页结束: %s", fund_code, str(e))
@@ -218,7 +213,6 @@ class MarketMonitor:
                     avg_gain = gain.rolling(window=14, min_periods=1).mean()
                     avg_loss = loss.rolling(window=14, min_periods=1).mean()
                     
-                    # 避免除以0
                     rs = avg_gain / avg_loss.replace(0, np.nan)
                     rsi = 100 - (100 / (1 + rs))
                     
