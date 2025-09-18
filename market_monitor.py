@@ -37,6 +37,20 @@ class MarketMonitor:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
         }
 
+    def _get_expected_latest_date(self):
+        """根据当前时间确定期望的最新数据日期"""
+        now = datetime.now()
+        # 假设净值更新时间为晚上21:00
+        update_time = time(21, 0)
+        if now.time() < update_time:
+            # 如果当前时间早于21:00，则期望最新日期为昨天
+            expected_date = now.date() - timedelta(days=1)
+        else:
+            # 否则，期望最新日期为今天
+            expected_date = now.date()
+        logger.info("当前时间: %s, 期望最新数据日期: %s", now.strftime('%Y-%m-%d %H:%M:%S'), expected_date)
+        return expected_date
+
     def _parse_report(self):
         """从 analysis_report.md 提取推荐基金代码"""
         logger.info("正在解析 %s 获取推荐基金代码...", self.report_file)
@@ -279,7 +293,7 @@ class MarketMonitor:
         # 步骤2: 预加载本地数据并检查是否需要下载
         logger.info("开始预加载本地缓存数据...")
         fund_codes_to_fetch = []
-        today = datetime.now().date()
+        expected_latest_date = self._get_expected_latest_date()
         min_data_points = 26  # 确保有足够数据计算技术指标
 
         for fund_code in self.fund_codes:
@@ -290,15 +304,15 @@ class MarketMonitor:
                 data_points = len(local_df)
                 
                 # 检查数据是否最新且完整
-                if latest_local_date >= today and data_points >= min_data_points:
-                    logger.info("基金 %s 的本地数据已是最新 (%s) 且数据量足够 (%d 行)，直接加载。",
-                                fund_code, latest_local_date, data_points)
+                if latest_local_date >= expected_latest_date and data_points >= min_data_points:
+                    logger.info("基金 %s 的本地数据已是最新 (%s, 期望: %s) 且数据量足够 (%d 行)，直接加载。",
+                                fund_code, latest_local_date, expected_latest_date, data_points)
                     self.fund_data[fund_code] = self._calculate_indicators(fund_code, local_df.tail(100))
                     continue
                 else:
-                    if latest_local_date < today:
-                        logger.info("基金 %s 本地数据已过时（最新日期为 %s），需要从网络获取新数据。",
-                                    fund_code, latest_local_date)
+                    if latest_local_date < expected_latest_date:
+                        logger.info("基金 %s 本地数据已过时（最新日期为 %s，期望 %s），需要从网络获取新数据。",
+                                    fund_code, latest_local_date, expected_latest_date)
                     if data_points < min_data_points:
                         logger.info("基金 %s 本地数据量不足（仅 %d 行，需至少 %d 行），需要从网络获取。",
                                     fund_code, data_points, min_data_points)
