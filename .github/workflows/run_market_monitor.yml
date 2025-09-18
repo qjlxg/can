@@ -37,9 +37,8 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade pandas numpy requests tenacity lxml
-          python -c "import pandas, numpy, requests, tenacity; import pkg_resources; print(f'Pandas: {pkg_resources.get_distribution(\"pandas\").version}, Requests: {pkg_resources.get_distribution(\"requests\").version}, Tenacity: {pkg_resources.get_distribution(\"tenacity\").version}')"
-
+          pip install --upgrade pandas numpy requests tenacity lxml tabulate
+        
       - name: Run Market Monitor script
         run: |
           rm -f market_monitor.log
