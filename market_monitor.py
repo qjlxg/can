@@ -269,31 +269,45 @@ class MarketMonitor:
                 handler.flush()
 
     def get_fund_data(self):
-        """主控函数：优先从本地加载，再用多线程下载新数据"""
-        
-        # 步骤1: 预加载本地数据
+        """主控函数：优先从本地加载，仅在数据非最新或不完整时下载"""
+        # 步骤1: 解析推荐基金代码
+        self._parse_report()
+        if not self.fund_codes:
+            logger.error("没有提取到任何基金代码，无法继续处理")
+            return
+
+        # 步骤2: 预加载本地数据并检查是否需要下载
         logger.info("开始预加载本地缓存数据...")
         fund_codes_to_fetch = []
         today = datetime.now().date()
-        
+        min_data_points = 26  # 确保有足够数据计算技术指标
+
         for fund_code in self.fund_codes:
             local_df = self._read_local_data(fund_code)
             
             if not local_df.empty:
                 latest_local_date = local_df['date'].max().date()
-                if latest_local_date >= today:
-                    logger.info("基金 %s 的本地数据已是最新 (%s)，直接加载。", fund_code, latest_local_date)
+                data_points = len(local_df)
+                
+                # 检查数据是否最新且完整
+                if latest_local_date >= today and data_points >= min_data_points:
+                    logger.info("基金 %s 的本地数据已是最新 (%s) 且数据量足够 (%d 行)，直接加载。",
+                                fund_code, latest_local_date, data_points)
                     self.fund_data[fund_code] = self._calculate_indicators(fund_code, local_df.tail(100))
                     continue
-            
-            # 本地无数据或数据非最新，标记为需要网络获取
-            if not local_df.empty:
-                logger.info("基金 %s 本地数据已过时（最新日期为 %s），需要从网络获取新数据。", fund_code, latest_local_date)
+                else:
+                    if latest_local_date < today:
+                        logger.info("基金 %s 本地数据已过时（最新日期为 %s），需要从网络获取新数据。",
+                                    fund_code, latest_local_date)
+                    if data_points < min_data_points:
+                        logger.info("基金 %s 本地数据量不足（仅 %d 行，需至少 %d 行），需要从网络获取。",
+                                    fund_code, data_points, min_data_points)
             else:
                 logger.info("基金 %s 本地数据不存在，需要从网络获取。", fund_code)
+            
             fund_codes_to_fetch.append(fund_code)
 
-        # 步骤2: 多线程网络下载
+        # 步骤3: 多线程网络下载
         if fund_codes_to_fetch:
             logger.info("开始使用多线程获取 %d 个基金的新数据...", len(fund_codes_to_fetch))
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -310,12 +324,14 @@ class MarketMonitor:
                             'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': "N/A",
                             'ma_ratio': "N/A", 'macd_diff': "N/A", 'bb_upper': "N/A", 'bb_lower': "N/A", 'advice': "观察"
                         }
+        else:
+            logger.info("所有基金数据均来自本地缓存，无需网络下载。")
         
         if len(self.fund_data) > 0:
             logger.info("所有基金数据处理完成。")
         else:
             logger.error("所有基金数据均获取失败。")
-    
+
     def generate_report(self):
         """生成市场情绪与技术指标监控报告"""
         logger.info("正在生成市场监控报告...")
@@ -362,7 +378,6 @@ if __name__ == "__main__":
     try:
         logger.info("脚本启动")
         monitor = MarketMonitor()
-        monitor._parse_report()
         monitor.get_fund_data()
         monitor.generate_report()
         logger.info("脚本执行完成")
