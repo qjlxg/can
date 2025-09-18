@@ -48,18 +48,14 @@ class MarketMonitor:
             logger.info("analysis_report.md 内容（前1000字符）: %s", content[:1000])
             
             # 使用更精确的正则表达式来匹配基金代码
-            # 1. 匹配表格中的基金代码，例如：| 007509 |
-            # 2. 匹配详细分析中的基金代码，例如：### 基金 001407 -
             pattern = re.compile(r'(?:^\| +(\d{6})|### 基金 (\d{6}))', re.M)
             matches = pattern.findall(content)
 
             extracted_codes = set()
             for match in matches:
-                # findall 返回的是一个元组，我们需要提取非空的那个
                 code = match[0] if match[0] else match[1]
                 extracted_codes.add(code)
             
-            # 将集合转换为列表并进行排序
             sorted_codes = sorted(list(extracted_codes))
             self.fund_codes = sorted_codes[:10]  # 限制前10个有效代码
             
@@ -100,18 +96,19 @@ class MarketMonitor:
             driver = webdriver.Chrome(service=service, options=options)
             
             url = f"http://fundf10.eastmoney.com/jjjz_{fund_code}.html"
-            driver.set_page_load_timeout(20)  # 增加页面加载超时到20秒
+            driver.set_page_load_timeout(20)
             driver.get(url)
             logger.info("访问URL: %s", url)
 
             all_data = []
             page_count = 1
             max_pages = 10  # 限制最大翻页数，避免无限循环
+            target_rows = 100  # 目标数据行数
             
             while page_count <= max_pages:
                 try:
                     # 等待表格容器加载，并确保内容可见
-                    wait = WebDriverWait(driver, 20)  # 增加等待时间
+                    wait = WebDriverWait(driver, 20)
                     wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
                     logger.info("第 %d 页: 历史净值表格容器加载完成并可见", page_count)
 
@@ -136,26 +133,30 @@ class MarketMonitor:
                     all_data.append(df)
                     logger.info("第 %d 页: 解析成功，获取 %d 行数据", page_count, len(df))
 
-                    # 检查是否有下一页按钮，并使用更精确的XPath
+                    # 检查数据量是否已达到目标
+                    total_rows = sum(len(d) for d in all_data)
+                    if total_rows >= target_rows:
+                        logger.info("基金 %s 已获取 %d 行数据，达到目标行数，停止翻页", fund_code, total_rows)
+                        break
+
+                    # 检查是否有下一页按钮
                     try:
-                        # 使用更精确的XPath，通过 class 属性定位 "下一页" 按钮
-                        next_button_xpath = "//div[@id='pagebar']/a[@class='next']"
+                        next_button_xpath = "//div[@id='pagebar']/a[@class='next']"  # 使用推荐的XPath
                         wait_short = WebDriverWait(driver, 10)
                         next_button = wait_short.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
                         
-                        # 检查按钮是否为最后一页的“不可点击”状态
+                        # 检查按钮是否为不可点击状态
                         button_class = next_button.get_attribute('class') or ''
                         if 'nolink' in button_class or 'disabled' in button_class:
                             logger.info("基金 %s 已到达最后一页，翻页结束", fund_code)
                             break
                         
-                        # 使用JavaScript点击，增加可靠性
-                        driver.execute_script("arguments[0].scrollIntoView(true);", next_button)  # 滚动到按钮位置
+                        # 使用JavaScript点击，并滚动到按钮位置
+                        driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
                         driver.execute_script("arguments[0].click();", next_button)
                         
-                        # 等待新页面加载，确保表格内容已更新
-                        wait_short.until(EC.presence_of_element_located((By.XPATH, "//table[@id='jztable']/tbody/tr[1]")))
-                        
+                        # 等待新页面表格内容加载
+                        wait_short.until(EC.presence_of_element_located((By.XPATH, "//table[@class='w782 comm lsjz']/tbody/tr[1]")))
                         page_count += 1
                         time.sleep(random.uniform(3, 5))  # 增加延迟以等待页面加载
 
@@ -176,11 +177,12 @@ class MarketMonitor:
             if all_data:
                 df = pd.concat(all_data, ignore_index=True)
                 df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
-                if len(df) < 100:
-                    logger.warning("基金 %s 数据量不足，仅获取 %d 行，预期 100 行", fund_code, len(df))
-                df = df.tail(100)  # 取最近 100 天
+                total_rows = len(df)
+                if total_rows < target_rows:
+                    logger.warning("基金 %s 数据量不足，仅获取 %d 行，预期 %d 行", fund_code, total_rows, target_rows)
+                df = df.tail(target_rows)  # 取最近 100 天
                 logger.info("成功解析基金 %s 的数据，共获取 %d 页，总行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                                 fund_code, page_count, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
+                            fund_code, page_count, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
                 return df[['date', 'net_value']]
             else:
                 raise ValueError("未获取到任何有效数据")
@@ -234,14 +236,13 @@ class MarketMonitor:
                         'ma_ratio': latest_ma50_ratio
                     }
                     logger.info("成功计算基金 %s 的技术指标: 净值=%.4f, RSI=%.2f, MA50比率=%.2f", 
-                                 fund_code, latest_net_value, latest_rsi, latest_ma50_ratio)
+                                fund_code, latest_net_value, latest_rsi, latest_ma50_ratio)
                 else:
                     self.fund_data[fund_code] = None
                     logger.warning("基金 %s 数据获取失败或数据不足，跳过计算 (数据行数: %s)", fund_code, len(df) if df is not None else 0)
                 
                 for handler in logger.handlers:
                     handler.flush()
-                # 在处理完一个基金后，随机延迟1到3秒
                 time.sleep(random.uniform(1, 3))
             except Exception as e:
                 logger.error("处理基金 %s 时发生异常: %s", fund_code, str(e))
@@ -268,7 +269,6 @@ class MarketMonitor:
                         rsi = data['rsi']
                         ma_ratio = data['ma_ratio']
 
-                        # 使用更安全的格式化逻辑
                         rsi_str = f"{rsi:.2f}" if not np.isnan(rsi) else "N/A"
                         ma_ratio_str = f"{ma_ratio:.2f}" if not np.isnan(ma_ratio) else "N/A"
 
