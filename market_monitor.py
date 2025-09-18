@@ -28,6 +28,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# 定义本地数据存储目录
+DATA_DIR = 'fund_data'
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+
 class MarketMonitor:
     def __init__(self, report_file='analysis_report.md', output_file='market_monitor_report.md'):
         self.report_file = report_file
@@ -74,6 +79,35 @@ class MarketMonitor:
             logger.error("解析报告文件失败: %s", e)
             raise
 
+    def _get_latest_local_date(self, fund_code):
+        """检查本地是否存在数据，并返回最新日期"""
+        file_path = os.path.join(DATA_DIR, f"{fund_code}.csv")
+        if os.path.exists(file_path):
+            try:
+                df = pd.read_csv(file_path)
+                if not df.empty and 'date' in df.columns:
+                    df['date'] = pd.to_datetime(df['date'])
+                    latest_date = df['date'].max().date()
+                    logger.info("本地已存在基金 %s 数据，最新日期为: %s", fund_code, latest_date)
+                    return latest_date, df
+            except Exception as e:
+                logger.warning("读取本地文件 %s 失败: %s", file_path, e)
+        return None, pd.DataFrame()
+
+    def _save_to_local_file(self, fund_code, new_data_df):
+        """将新数据追加到本地文件"""
+        file_path = os.path.join(DATA_DIR, f"{fund_code}.csv")
+        # 确保目录存在
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
+        # 检查文件是否已存在
+        if os.path.exists(file_path):
+            new_data_df.to_csv(file_path, mode='a', header=False, index=False)
+            logger.info("新数据已追加到本地文件: %s", file_path)
+        else:
+            new_data_df.to_csv(file_path, index=False)
+            logger.info("新数据已保存到本地文件: %s", file_path)
+
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(3),
         wait=tenacity.wait_fixed(2),
@@ -83,6 +117,9 @@ class MarketMonitor:
     def _get_fund_data_from_eastmoney(self, fund_code):
         """使用 Selenium 从 fund.eastmoney.com 抓取基金历史净值数据（含URL参数翻页）"""
         logger.info("正在获取基金 %s 的净值数据...", fund_code)
+        
+        # 检查本地是否有数据
+        latest_local_date, local_df = self._get_latest_local_date(fund_code)
         
         driver = None
         try:
@@ -102,6 +139,8 @@ class MarketMonitor:
             all_data = []
             page_index = 1
             max_pages = 200  # 设置最大翻页数，防止无限循环
+            
+            found_new_data = False
             
             while page_index <= max_pages:
                 try:
@@ -129,14 +168,30 @@ class MarketMonitor:
                     df['date'] = pd.to_datetime(df['date'], errors='coerce')
                     df['net_value'] = pd.to_numeric(df['net_value'], errors='coerce')
                     df = df.dropna(subset=['date', 'net_value'])
-                    all_data.append(df)
-                    logger.info("第 %d 页: 解析成功，获取 %d 行数据", page_index, len(df))
                     
+                    # 检查新获取的数据是否已存在于本地
+                    if latest_local_date:
+                        # 过滤掉本地已有的数据
+                        new_df = df[df['date'].dt.date > latest_local_date]
+                        if not new_df.empty:
+                            all_data.append(new_df)
+                            found_new_data = True
+                            logger.info("第 %d 页: 发现 %d 行新数据", page_index, len(new_df))
+                        
+                        # 如果当前页面没有新数据，且获取到的数据行数正常（说明本地已是最新），则停止爬取
+                        if new_df.empty and len(df) == 20:
+                            logger.info("基金 %s 已获取到最新数据，爬取结束", fund_code)
+                            break
+
+                    else: # 如果本地没有数据，则全部保存
+                        all_data.append(df)
+                        found_new_data = True
+
                     # 检查是否为最后一页（数据量小于20行，通常表示已到最后一页）
                     if len(df) < 20:
                         logger.info("基金 %s 数据量不足20行，翻页结束", fund_code)
                         break
-
+                        
                     page_index += 1
                     time.sleep(random.uniform(2, 4))  # 增加延迟以模拟人工操作
 
@@ -148,16 +203,32 @@ class MarketMonitor:
                     break
 
             if all_data:
-                df = pd.concat(all_data, ignore_index=True)
-                df = df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
-                if len(df) < 100:
-                    logger.warning("基金 %s 数据量不足，仅获取 %d 行，预期 100 行", fund_code, len(df))
-                df = df.tail(100)  # 取最近 100 天
+                new_full_df = pd.concat(all_data, ignore_index=True)
+                new_full_df = new_full_df.drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
+
+                if found_new_data:
+                    self._save_to_local_file(fund_code, new_full_df)
+
+                # 合并本地数据和新抓取的数据
+                if not local_df.empty:
+                    df_combined = pd.concat([local_df, new_full_df]).drop_duplicates(subset=['date']).sort_values(by='date', ascending=True)
+                else:
+                    df_combined = new_full_df
+                    
+                if len(df_combined) < 100:
+                    logger.warning("基金 %s 总数据量不足，仅获取 %d 行", fund_code, len(df_combined))
+                
+                df_combined = df_combined.tail(100)  # 取最近 100 天
                 logger.info("成功解析基金 %s 的数据，共获取 %d 页，总行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                                 fund_code, page_index - 1, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
-                return df[['date', 'net_value']]
+                                 fund_code, page_index - 1, len(df_combined), df_combined['date'].iloc[-1].strftime('%Y-%m-%d'), df_combined['net_value'].iloc[-1])
+                return df_combined[['date', 'net_value']]
             else:
-                raise ValueError("未获取到任何有效数据")
+                if not local_df.empty:
+                    logger.info("基金 %s 无新数据，使用本地历史数据", fund_code)
+                    df_combined = local_df.tail(100)
+                    return df_combined[['date', 'net_value']]
+                else:
+                    raise ValueError("未获取到任何有效数据")
 
         except Exception as e:
             logger.error("Selenium 抓取基金 %s 失败: %s", fund_code, str(e))
