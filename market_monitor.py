@@ -103,8 +103,8 @@ class MarketMonitor:
         logger.info("基金 %s 数据已成功保存到本地文件: %s", fund_code, file_path)
 
     @tenacity.retry(
-        stop=tenacity.stop_after_attempt(3),
-        wait=tenacity.wait_fixed(5),
+        stop=tenacity.stop_after_attempt(5),  # 增加重试次数到5
+        wait=tenacity.wait_fixed(10),  # 等待时间增加到10秒
         retry=tenacity.retry_if_exception_type((requests.exceptions.RequestException, ValueError)),
         before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[0]}，第 {retry_state.attempt_number} 次")
     )
@@ -121,7 +121,7 @@ class MarketMonitor:
             logger.info("访问URL: %s", url)
             
             try:
-                response = requests.get(url, headers=self.headers, timeout=10)
+                response = requests.get(url, headers=self.headers, timeout=30)  # 增加超时到30秒
                 response.raise_for_status()
                 
                 content_match = re.search(r'content:"(.*?)"', response.text, re.S)
@@ -170,7 +170,7 @@ class MarketMonitor:
                     break
                 
                 page_index += 1
-                time_module.sleep(random.uniform(0.5, 1.5))
+                time_module.sleep(random.uniform(1, 2))  # 延长sleep到1-2秒，减少限速风险
                 
             except requests.exceptions.RequestException as e:
                 logger.error("基金 %s API请求失败: %s", fund_code, str(e))
@@ -201,9 +201,9 @@ class MarketMonitor:
             if df is None or df.empty or len(df) < 26:
                 logger.warning("基金 %s 数据获取失败或数据不足，跳过计算 (数据行数: %s)", fund_code, len(df) if df is not None else 0)
                 return {
-                    'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': "N/A", 'ma_ratio': "N/A",
-                    'macd_diff': "N/A", 'bb_upper': "N/A", 'bb_lower': "N/A", 'advice': "观察"
-                }
+                    'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': np.nan, 'ma_ratio': np.nan,
+                    'macd_diff': np.nan, 'bb_upper': np.nan, 'bb_lower': np.nan, 'advice': "观察"
+                }  # 改为np.nan，便于统一处理
 
             df = df.sort_values(by='date', ascending=True)
             
@@ -271,11 +271,11 @@ class MarketMonitor:
             return {
                 'fund_code': fund_code,
                 'latest_net_value': "数据获取失败",
-                'rsi': "N/A",
-                'ma_ratio': "N/A",
-                'macd_diff': "N/A",
-                'bb_upper': "N/A",
-                'bb_lower': "N/A",
+                'rsi': np.nan,
+                'ma_ratio': np.nan,
+                'macd_diff': np.nan,
+                'bb_upper': np.nan,
+                'bb_lower': np.nan,
                 'advice': "观察"
             }
         finally:
@@ -335,8 +335,8 @@ class MarketMonitor:
                     except Exception as e:
                         logger.error("获取和处理基金 %s 数据时出错: %s", fund_code, str(e))
                         self.fund_data[fund_code] = {
-                            'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': "N/A",
-                            'ma_ratio': "N/A", 'macd_diff': "N/A", 'bb_upper': "N/A", 'bb_lower': "N/A", 'advice': "观察"
+                            'fund_code': fund_code, 'latest_net_value': "数据获取失败", 'rsi': np.nan,
+                            'ma_ratio': np.nan, 'macd_diff': np.nan, 'bb_upper': np.nan, 'bb_lower': np.nan, 'advice': "观察"
                         }
         else:
             logger.info("所有基金数据均来自本地缓存，无需网络下载。")
@@ -354,17 +354,29 @@ class MarketMonitor:
             data = self.fund_data.get(fund_code)
             if data is not None:
                 latest_net_value_str = f"{data['latest_net_value']:.4f}" if isinstance(data['latest_net_value'], (float, int)) else str(data['latest_net_value'])
-                rsi_str = f"{data['rsi']:.2f}" if not np.isnan(data['rsi']) else "N/A"
-                ma_ratio_str = f"{data['ma_ratio']:.2f}" if not np.isnan(data['ma_ratio']) else "N/A"
+                rsi_str = f"{data['rsi']:.2f}" if isinstance(data['rsi'], (float, int)) and not np.isnan(data['rsi']) else "N/A"
+                ma_ratio_str = f"{data['ma_ratio']:.2f}" if isinstance(data['ma_ratio'], (float, int)) and not np.isnan(data['ma_ratio']) else "N/A"
+                
+                macd_signal = "N/A"
+                if isinstance(data['macd_diff'], (float, int)) and not np.isnan(data['macd_diff']):
+                    macd_signal = "金叉" if data['macd_diff'] > 0 else "死叉"
+                
+                bollinger_pos = "中轨"  # 默认中轨
+                if isinstance(data['latest_net_value'], (float, int)):
+                    if isinstance(data['bb_upper'], (float, int)) and not np.isnan(data['bb_upper']) and data['latest_net_value'] > data['bb_upper']:
+                        bollinger_pos = "上轨上方"
+                    elif isinstance(data['bb_lower'], (float, int)) and not np.isnan(data['bb_lower']) and data['latest_net_value'] < data['bb_lower']:
+                        bollinger_pos = "下轨下方"
+                else:
+                    bollinger_pos = "N/A"
                 
                 report_df_list.append({
                     "基金代码": fund_code,
                     "最新净值": latest_net_value_str,
                     "RSI": rsi_str,
                     "净值/MA50": ma_ratio_str,
-                    "MACD信号": "金叉" if not np.isnan(data['macd_diff']) and data['macd_diff'] > 0 else "死叉" if not np.isnan(data['macd_diff']) and data['macd_diff'] < 0 else "N/A",
-                    "布林带位置": "上轨上方" if not np.isnan(data['bb_upper']) and (isinstance(data['latest_net_value'], (float, int)) and data['latest_net_value'] > data['bb_upper']) else \
-                                 "下轨下方" if not np.isnan(data['bb_lower']) and (isinstance(data['latest_net_value'], (float, int)) and data['latest_net_value'] < data['bb_lower']) else "中轨",
+                    "MACD信号": macd_signal,
+                    "布林带位置": bollinger_pos,
                     "投资建议": data['advice']
                 })
             else:
