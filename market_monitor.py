@@ -110,7 +110,7 @@ class MarketMonitor:
 
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(3),
-        wait=tenacity.wait_fixed(2),
+        wait=tenacity.wait_fixed(5),  # 增加重试等待时间
         retry=tenacity.retry_if_exception_type((TimeoutException, WebDriverException)),
         before_sleep=lambda retry_state: logger.info(f"重试基金 {retry_state.args[1]}，第 {retry_state.attempt_number} 次")
     )
@@ -131,6 +131,8 @@ class MarketMonitor:
             options.add_argument('--window-size=1920,1080')
             options.add_argument('--disable-extensions')
             options.add_argument('--disable-infobars')
+            options.add_argument('--disable-software-rasterizer')
+            options.add_argument('--enable-javascript-i18n-api')
             options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36')
             
             service = Service(ChromeDriverManager().install())
@@ -145,12 +147,12 @@ class MarketMonitor:
             while page_index <= max_pages:
                 try:
                     url = f"http://fundf10.eastmoney.com/jjjz_{fund_code}.html?p={page_index}"
-                    driver.set_page_load_timeout(20)
+                    driver.set_page_load_timeout(40) # 增加页面加载超时到40秒
                     driver.get(url)
                     logger.info("访问URL: %s", url)
                     
                     # 等待表格容器加载
-                    wait = WebDriverWait(driver, 20)
+                    wait = WebDriverWait(driver, 30) # 增加等待时间到30秒
                     wait.until(EC.visibility_of_element_located((By.ID, 'jztable')))
                     logger.info("第 %d 页: 历史净值表格容器加载完成并可见", page_index)
 
@@ -197,7 +199,7 @@ class MarketMonitor:
 
                 except TimeoutException as e:
                     logger.error("基金 %s 页面加载超时: %s", fund_code, str(e))
-                    break
+                    raise # 重新抛出异常，让 tenacity 捕获并重试
                 except Exception as e:
                     logger.error("基金 %s 翻页失败: %s", fund_code, str(e))
                     break
