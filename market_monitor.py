@@ -136,14 +136,14 @@ class MarketMonitor:
                     all_data.append(df)
                     logger.info("第 %d 页: 解析成功，获取 %d 行数据", page_count, len(df))
 
-                    # 检查是否有下一页按钮
+                    # 检查是否有下一页按钮，并使用更精确的XPath
                     try:
-                        # 使用更鲁棒的XPath，匹配分页导航中的“下一页”
-                        next_button_xpath = "//div[@id='pagebar']//a[contains(normalize-space(text()), '下一页')]"
-                        wait = WebDriverWait(driver, 10)  # 单独为下一页按钮设置较短的等待时间
-                        next_button = wait.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
+                        # 使用更精确的XPath，通过 class 属性定位 "下一页" 按钮
+                        next_button_xpath = "//div[@id='pagebar']/a[@class='next']"
+                        wait_short = WebDriverWait(driver, 10)
+                        next_button = wait_short.until(EC.element_to_be_clickable((By.XPATH, next_button_xpath)))
                         
-                        # 检查按钮是否可点击
+                        # 检查按钮是否为最后一页的“不可点击”状态
                         button_class = next_button.get_attribute('class') or ''
                         if 'nolink' in button_class or 'disabled' in button_class:
                             logger.info("基金 %s 已到达最后一页，翻页结束", fund_code)
@@ -152,6 +152,10 @@ class MarketMonitor:
                         # 使用JavaScript点击，增加可靠性
                         driver.execute_script("arguments[0].scrollIntoView(true);", next_button)  # 滚动到按钮位置
                         driver.execute_script("arguments[0].click();", next_button)
+                        
+                        # 等待新页面加载，确保表格内容已更新
+                        wait_short.until(EC.presence_of_element_located((By.XPATH, "//table[@id='jztable']/tbody/tr[1]")))
+                        
                         page_count += 1
                         time.sleep(random.uniform(3, 5))  # 增加延迟以等待页面加载
 
@@ -176,7 +180,7 @@ class MarketMonitor:
                     logger.warning("基金 %s 数据量不足，仅获取 %d 行，预期 100 行", fund_code, len(df))
                 df = df.tail(100)  # 取最近 100 天
                 logger.info("成功解析基金 %s 的数据，共获取 %d 页，总行数: %d, 最新日期: %s, 最新净值: %.4f", 
-                            fund_code, page_count, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
+                                 fund_code, page_count, len(df), df['date'].iloc[-1].strftime('%Y-%m-%d'), df['net_value'].iloc[-1])
                 return df[['date', 'net_value']]
             else:
                 raise ValueError("未获取到任何有效数据")
@@ -230,7 +234,7 @@ class MarketMonitor:
                         'ma_ratio': latest_ma50_ratio
                     }
                     logger.info("成功计算基金 %s 的技术指标: 净值=%.4f, RSI=%.2f, MA50比率=%.2f", 
-                                fund_code, latest_net_value, latest_rsi, latest_ma50_ratio)
+                                 fund_code, latest_net_value, latest_rsi, latest_ma50_ratio)
                 else:
                     self.fund_data[fund_code] = None
                     logger.warning("基金 %s 数据获取失败或数据不足，跳过计算 (数据行数: %s)", fund_code, len(df) if df is not None else 0)
