@@ -2,7 +2,7 @@ name: Run Market Monitor
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 */3 * * *'
   push:
     paths:
       - 'analysis_report.md'
